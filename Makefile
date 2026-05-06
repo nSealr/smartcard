@@ -1,19 +1,26 @@
 .PHONY: setup test lint audit docs ci
 
+PYTHON := .venv/bin/python
+PIP := $(PYTHON) -m pip
+
 setup:
-	@echo "No setup required until the PC/SC tooling scaffold is introduced."
+	python3 -m venv .venv
+	$(PIP) install --disable-pip-version-check -r requirements.txt
+	$(PIP) install --disable-pip-version-check .
 
 test:
-	python3 scripts/verify_repo.py
+	$(PYTHON) scripts/verify_repo.py
+	$(PYTHON) -m unittest discover -s tests
 
 lint:
-	python3 scripts/verify_repo.py
+	$(PYTHON) scripts/verify_repo.py
+	$(PYTHON) -m compileall -q tools tests
 
 audit:
-	python3 scripts/verify_repo.py
+	$(PYTHON) scripts/verify_repo.py
+	$(PIP) check
 
 docs:
-	python3 scripts/verify_repo.py
+	$(PYTHON) scripts/verify_repo.py
 
 ci: setup test lint audit docs
-

@@ -6,6 +6,17 @@
 make ci
 ```
 
+The baseline runs repository verification, Python unit tests, bytecode
+compilation, and isolated `pip check`.
+
+## Implemented Tests
+
+- Short APDU command encode/decode round trip.
+- Short APDU oversized payload rejection.
+- `GET_PUBLIC_KEY` simulator response.
+- `SIGN_EVENT_ID` simulator response with Schnorr verification against shared
+  `NostrSeal/specs` fixtures.
+
 ## Required Tests
 
 - APDU fixture tests.
@@ -15,4 +26,3 @@ make ci
 - Simulator fallback when hardware is not available.
 
 Display-less cards must not be represented as trusted event review devices.
-

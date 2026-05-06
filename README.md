@@ -15,6 +15,19 @@ repository host a forked or custom JavaCard applet.
 - JavaCard applet experiments.
 - Smartcard provisioning and PIN policy notes.
 
+## Current Capabilities
+
+- Python APDU codec for short command and response APDUs.
+- NostrSeal proprietary APDU constants for `GET_PUBLIC_KEY` and
+  `SIGN_EVENT_ID`.
+- secp256k1-backed simulator that returns x-only public keys and signs 32-byte
+  Nostr event ids.
+- Tests against shared `NostrSeal/specs` event-id fixtures.
+
+Important trust boundary: the current smartcard model signs a 32-byte event id,
+not full event JSON. A display-less card can protect key material, but it cannot
+provide trusted event review by itself.
+
 ## Initial Layout
 
 - `applet/`: custom or forked JavaCard applet work.
