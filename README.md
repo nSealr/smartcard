@@ -21,8 +21,15 @@ repository host a forked or custom JavaCard applet.
 - `tools/`: PC/SC, APDU, and test utilities.
 - `docs/`: source review, card profiles, provisioning, and threat notes.
 
-## License Plan
+## Quality Baseline
 
-Applet work should stay compatible with upstream Satochip licensing if forked.
-New tooling should use a copyleft software license unless interoperability
-requires a more permissive module.
+Run the repository verification loop with:
+
+```sh
+make ci
+```
+
+## License
+
+New smartcard tooling is released under the MIT License unless a file says
+otherwise. Forked or imported applets must preserve their upstream licenses.
