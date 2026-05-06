@@ -1,4 +1,4 @@
-# NostrSeal Card
+# NostrSeal Smartcard
 
 JavaCard/NFC/contact smartcard signer work for NostrSeal.
 
@@ -26,4 +26,3 @@ repository host a forked or custom JavaCard applet.
 Applet work should stay compatible with upstream Satochip licensing if forked.
 New tooling should use a copyleft software license unless interoperability
 requires a more permissive module.
-
