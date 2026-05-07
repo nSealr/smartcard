@@ -13,7 +13,16 @@ from nostrseal_smartcard.simulator import SmartcardSimulator, verify_schnorr_sig
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPECS = ROOT.parent / "specs"
+
+
+def specs_dir() -> Path:
+    sibling = ROOT.parent / "specs"
+    if sibling.exists():
+        return sibling
+    return ROOT / "tests/fixtures/specs"
+
+
+SPECS = specs_dir()
 KEY = json.loads((SPECS / "vectors/keys/test-key-1.json").read_text(encoding="utf-8"))
 BASIC_VECTOR = json.loads((SPECS / "vectors/events/kind-1-basic.json").read_text(encoding="utf-8"))
 GET_PUBLIC_KEY_VECTOR = json.loads((SPECS / "vectors/smartcard/get-public-key.json").read_text(encoding="utf-8"))

@@ -17,6 +17,9 @@ compilation, and isolated `pip check`.
 - `SIGN_EVENT_ID` simulator response with Schnorr verification against shared
   `NostrSeal/specs` fixtures.
 - Shared `NostrSeal/specs` APDU vector conformance tests.
+- Single-repo CI falls back to fixture snapshots under `tests/fixtures/specs`
+  when the sibling `NostrSeal/specs` checkout is not present. Cross-repo drift
+  is still guarded by `NostrSeal/lab` integration checks.
 
 ## Required Tests
 

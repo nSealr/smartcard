@@ -1,0 +1,50 @@
+{
+  "name": "kind-1-basic",
+  "request": {
+    "version": 1,
+    "request_id": "req-kind-1-basic",
+    "method": "sign_event",
+    "params": {
+      "event_template": {
+        "created_at": 1710000000,
+        "kind": 1,
+        "tags": [],
+        "content": "NostrSeal fixture: basic kind 1 event."
+      }
+    }
+  },
+  "response": {
+    "version": 1,
+    "request_id": "req-kind-1-basic",
+    "ok": true,
+    "result": {
+      "event": {
+        "id": "9da1ba5f49db5945fad6962f26169fdb74d01d47cb8be290e29a0a90146f8206",
+        "pubkey": "4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa",
+        "created_at": 1710000000,
+        "kind": 1,
+        "tags": [],
+        "content": "NostrSeal fixture: basic kind 1 event.",
+        "sig": "044b17282c3679cc441998b10e19579458e2c73dc435664d105566105e834c8e5b0fa2522ed5b2ab16bf754f76464096c2c8d83b0e803fc812a271ce812aced2"
+      }
+    }
+  },
+  "event_template": {
+    "created_at": 1710000000,
+    "kind": 1,
+    "tags": [],
+    "content": "NostrSeal fixture: basic kind 1 event."
+  },
+  "signed_event": {
+    "id": "9da1ba5f49db5945fad6962f26169fdb74d01d47cb8be290e29a0a90146f8206",
+    "pubkey": "4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa",
+    "created_at": 1710000000,
+    "kind": 1,
+    "tags": [],
+    "content": "NostrSeal fixture: basic kind 1 event.",
+    "sig": "044b17282c3679cc441998b10e19579458e2c73dc435664d105566105e834c8e5b0fa2522ed5b2ab16bf754f76464096c2c8d83b0e803fc812a271ce812aced2"
+  },
+  "canonical_serialization": "[0,\"4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa\",1710000000,1,[],\"NostrSeal fixture: basic kind 1 event.\"]",
+  "event_id": "9da1ba5f49db5945fad6962f26169fdb74d01d47cb8be290e29a0a90146f8206",
+  "signature": "044b17282c3679cc441998b10e19579458e2c73dc435664d105566105e834c8e5b0fa2522ed5b2ab16bf754f76464096c2c8d83b0e803fc812a271ce812aced2"
+}

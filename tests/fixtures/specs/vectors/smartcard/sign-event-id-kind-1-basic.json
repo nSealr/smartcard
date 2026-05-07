@@ -1,0 +1,11 @@
+{
+  "name": "sign-event-id-kind-1-basic",
+  "format": "smartcard-apdu-v0",
+  "cla": "80",
+  "ins": "20",
+  "event_id": "9da1ba5f49db5945fad6962f26169fdb74d01d47cb8be290e29a0a90146f8206",
+  "command_hex": "80200000209da1ba5f49db5945fad6962f26169fdb74d01d47cb8be290e29a0a90146f8206",
+  "expected_status_word": "9000",
+  "expected_data_length": 64,
+  "verification_pubkey": "4f355bdcb7cc0af728ef3cceb9615d90684bb5b2ca5f859ab0f0b704075871aa"
+}
