@@ -16,13 +16,16 @@ ROOT = Path(__file__).resolve().parents[1]
 SPECS = ROOT.parent / "specs"
 KEY = json.loads((SPECS / "vectors/keys/test-key-1.json").read_text(encoding="utf-8"))
 BASIC_VECTOR = json.loads((SPECS / "vectors/events/kind-1-basic.json").read_text(encoding="utf-8"))
+GET_PUBLIC_KEY_VECTOR = json.loads((SPECS / "vectors/smartcard/get-public-key.json").read_text(encoding="utf-8"))
+SIGN_EVENT_ID_VECTOR = json.loads((SPECS / "vectors/smartcard/sign-event-id-kind-1-basic.json").read_text(encoding="utf-8"))
 
 
 class SmartcardProtocolTests(unittest.TestCase):
     def test_short_apdu_encoding_round_trip(self) -> None:
-        command = CommandAPDU(NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes.fromhex(BASIC_VECTOR["event_id"]))
+        command = CommandAPDU(NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes.fromhex(SIGN_EVENT_ID_VECTOR["event_id"]))
         encoded = command.to_bytes()
 
+        self.assertEqual(encoded.hex(), SIGN_EVENT_ID_VECTOR["command_hex"])
         self.assertEqual(encoded[:5], bytes([NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, 32]))
         self.assertEqual(CommandAPDU.from_bytes(encoded), command)
 
@@ -32,21 +35,29 @@ class SmartcardProtocolTests(unittest.TestCase):
 
     def test_get_public_key_apdu(self) -> None:
         simulator = SmartcardSimulator(KEY["secret_key"])
-        response = simulator.exchange(CommandAPDU(NOSTRSEAL_CLA, INS_GET_PUBLIC_KEY))
+        command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
+        response = simulator.exchange(command)
 
         self.assertEqual(response.status_word, SW_NO_ERROR)
-        self.assertEqual(response.data.hex(), KEY["public_key"])
+        self.assertEqual(response.data.hex(), GET_PUBLIC_KEY_VECTOR["response_data_hex"])
+        self.assertEqual(response.to_bytes().hex(), GET_PUBLIC_KEY_VECTOR["response_hex"])
         self.assertEqual(ResponseAPDU.from_bytes(response.to_bytes()), response)
 
     def test_sign_event_id_apdu_returns_valid_schnorr_signature(self) -> None:
         simulator = SmartcardSimulator(KEY["secret_key"])
-        response = simulator.exchange(
-            CommandAPDU(NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, data=bytes.fromhex(BASIC_VECTOR["event_id"]))
-        )
+        command = CommandAPDU.from_bytes(bytes.fromhex(SIGN_EVENT_ID_VECTOR["command_hex"]))
+        response = simulator.exchange(command)
 
         self.assertEqual(response.status_word, SW_NO_ERROR)
-        self.assertEqual(len(response.data), 64)
-        self.assertTrue(verify_schnorr_signature(KEY["public_key"], BASIC_VECTOR["event_id"], response.data.hex()))
+        self.assertEqual(f"{response.status_word:04x}", SIGN_EVENT_ID_VECTOR["expected_status_word"])
+        self.assertEqual(len(response.data), SIGN_EVENT_ID_VECTOR["expected_data_length"])
+        self.assertTrue(
+            verify_schnorr_signature(
+                SIGN_EVENT_ID_VECTOR["verification_pubkey"],
+                SIGN_EVENT_ID_VECTOR["event_id"],
+                response.data.hex(),
+            )
+        )
 
 
 if __name__ == "__main__":

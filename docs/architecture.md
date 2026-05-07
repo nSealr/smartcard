@@ -29,3 +29,6 @@ The first command boundary is deliberately small:
 This mirrors what display-less smartcards can realistically do without a trusted
 screen. The companion or another trusted review device must still compute and
 review the event before sending the digest to the card.
+
+Tests consume APDU vectors from `NostrSeal/specs` so command bytes and response
+expectations remain shared across implementations.

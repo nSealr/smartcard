@@ -16,6 +16,7 @@ compilation, and isolated `pip check`.
 - `GET_PUBLIC_KEY` simulator response.
 - `SIGN_EVENT_ID` simulator response with Schnorr verification against shared
   `NostrSeal/specs` fixtures.
+- Shared `NostrSeal/specs` APDU vector conformance tests.
 
 ## Required Tests
 
