@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from nostrseal_smartcard.apdu import CommandAPDU, ResponseAPDU
+from nostrseal_smartcard.pcsc import PcscTransport, PcscUnavailableError
 from nostrseal_smartcard.protocol import (
     INS_GET_PUBLIC_KEY,
     INS_SIGN_EVENT_ID,
@@ -27,6 +28,28 @@ KEY = json.loads((SPECS / "vectors/keys/test-key-1.json").read_text(encoding="ut
 BASIC_VECTOR = json.loads((SPECS / "vectors/events/kind-1-basic.json").read_text(encoding="utf-8"))
 GET_PUBLIC_KEY_VECTOR = json.loads((SPECS / "vectors/smartcard/get-public-key.json").read_text(encoding="utf-8"))
 SIGN_EVENT_ID_VECTOR = json.loads((SPECS / "vectors/smartcard/sign-event-id-kind-1-basic.json").read_text(encoding="utf-8"))
+
+
+class FakePcscConnection:
+    def __init__(self, response: tuple[list[int], int, int]) -> None:
+        self.response = response
+        self.connected = False
+        self.transmitted: bytes | None = None
+
+    def connect(self) -> None:
+        self.connected = True
+
+    def transmit(self, command: list[int]) -> tuple[list[int], int, int]:
+        self.transmitted = bytes(command)
+        return self.response
+
+
+class FakePcscReader:
+    def __init__(self, connection: FakePcscConnection) -> None:
+        self.connection = connection
+
+    def createConnection(self) -> FakePcscConnection:
+        return self.connection
 
 
 class SmartcardProtocolTests(unittest.TestCase):
@@ -67,6 +90,29 @@ class SmartcardProtocolTests(unittest.TestCase):
                 response.data.hex(),
             )
         )
+
+    def test_pcsc_transport_exchanges_short_apdus_with_connection(self) -> None:
+        command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
+        connection = FakePcscConnection((
+            list(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["response_data_hex"])),
+            0x90,
+            0x00,
+        ))
+
+        transport = PcscTransport.from_first_reader(lambda: [FakePcscReader(connection)])
+        response = transport.exchange(command)
+
+        self.assertTrue(connection.connected)
+        self.assertEqual(connection.transmitted, command.to_bytes())
+        self.assertEqual(response, ResponseAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["response_hex"])))
+
+    def test_pcsc_transport_fails_clearly_without_pcsc_provider(self) -> None:
+        with self.assertRaisesRegex(PcscUnavailableError, "pyscard"):
+            PcscTransport.from_first_reader(lambda: (_ for _ in ()).throw(ImportError("No module named smartcard")))
+
+    def test_pcsc_transport_fails_clearly_without_readers(self) -> None:
+        with self.assertRaisesRegex(PcscUnavailableError, "no PC/SC smartcard readers"):
+            PcscTransport.from_first_reader(lambda: [])
 
 
 if __name__ == "__main__":

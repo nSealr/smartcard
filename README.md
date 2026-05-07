@@ -23,6 +23,10 @@ repository host a forked or custom JavaCard applet.
 - secp256k1-backed simulator that returns x-only public keys and signs 32-byte
   Nostr event ids.
 - Tests against shared `NostrSeal/specs` event-id fixtures.
+- Optional PC/SC transport boundary that exchanges short APDUs through
+  `pyscard` when available and fails clearly when PC/SC prerequisites or
+  readers are missing. It is tested with fake connections; no real card support
+  is claimed yet.
 
 Important trust boundary: the current smartcard model signs a 32-byte event id,
 not full event JSON. A display-less card can protect key material, but it cannot

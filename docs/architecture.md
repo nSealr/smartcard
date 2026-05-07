@@ -20,6 +20,10 @@ technical references. License boundaries must be respected before any code reuse
 - `nostrseal_smartcard.apdu`: short APDU command/response encoding.
 - `nostrseal_smartcard.protocol`: NostrSeal CLA/INS/status-word constants.
 - `nostrseal_smartcard.simulator`: secp256k1-backed local simulator.
+- `nostrseal_smartcard.pcsc`: optional PC/SC transport boundary. It imports
+  `pyscard` only when a real PC/SC reader is requested, exchanges short APDUs
+  through a connection object, and returns explicit setup errors when `pyscard`
+  or readers are unavailable.
 
 The first command boundary is deliberately small:
 
@@ -32,3 +36,7 @@ review the event before sending the digest to the card.
 
 Tests consume APDU vectors from `NostrSeal/specs` so command bytes and response
 expectations remain shared across implementations.
+
+The PC/SC boundary is not proof of real-card compatibility. It is the adapter
+shape that future Satochip/NostrKey captures and hardware tests should drive
+once cards and readers are available.
