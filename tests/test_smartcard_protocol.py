@@ -147,6 +147,20 @@ class SmartcardProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(PcscUnavailableError, "PC/SC reader connection failed"):
             PcscTransport.from_first_reader(lambda: [BrokenReader()])
 
+    def test_pcsc_transport_fails_clearly_when_apdu_exchange_fails(self) -> None:
+        class BrokenExchangeConnection:
+            def connect(self) -> None:
+                pass
+
+            def transmit(self, command: list[int]) -> tuple[list[int], int, int]:
+                raise RuntimeError("card removed")
+
+        command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
+        transport = PcscTransport.from_first_reader(lambda: [FakePcscReader(BrokenExchangeConnection())])
+
+        with self.assertRaisesRegex(PcscUnavailableError, "PC/SC APDU exchange failed"):
+            transport.exchange(command)
+
 
 if __name__ == "__main__":
     unittest.main()

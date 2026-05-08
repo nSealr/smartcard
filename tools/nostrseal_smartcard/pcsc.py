@@ -66,7 +66,10 @@ class PcscTransport:
         return cls(connection)
 
     def exchange(self, command: CommandAPDU) -> ResponseAPDU:
-        data, sw1, sw2 = self.connection.transmit(list(command.to_bytes()))
+        try:
+            data, sw1, sw2 = self.connection.transmit(list(command.to_bytes()))
+        except Exception as error:
+            raise PcscUnavailableError("PC/SC APDU exchange failed") from error
         response_data = bytes(
             _require_pcsc_byte(byte, "PC/SC response data bytes must fit in one byte")
             for byte in data

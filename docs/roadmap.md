@@ -20,8 +20,9 @@ Status: implemented as the first smartcard protocol foundation.
 Status: the first optional PC/SC transport boundary is implemented. It wraps a
 reader connection, exchanges short APDUs, rejects out-of-range response bytes,
 and reports missing `pyscard`, failed reader enumeration, missing readers, or
-reader connection setup explicitly. It is fake-connection tested only; real
-Satochip, NostrKey, and reader captures remain pending.
+reader connection setup explicitly. APDU exchange failures are also normalized
+to a PC/SC transport error. It is fake-connection tested only; real Satochip,
+NostrKey, and reader captures remain pending.
 
 ## Later
 
