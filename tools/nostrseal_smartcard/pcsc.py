@@ -26,6 +26,12 @@ class PcscReader(Protocol):
 ReadersProvider = Callable[[], Iterable[PcscReader]]
 
 
+def _require_pcsc_byte(value: int, message: str) -> int:
+    if value < 0 or value > 0xFF:
+        raise ValueError(message)
+    return value
+
+
 def _pyscard_readers() -> Iterable[PcscReader]:
     try:
         from smartcard.System import readers
@@ -54,4 +60,11 @@ class PcscTransport:
 
     def exchange(self, command: CommandAPDU) -> ResponseAPDU:
         data, sw1, sw2 = self.connection.transmit(list(command.to_bytes()))
-        return ResponseAPDU(bytes(data), (sw1 << 8) | sw2)
+        response_data = bytes(
+            _require_pcsc_byte(byte, "PC/SC response data bytes must fit in one byte")
+            for byte in data
+        )
+        status_word = (
+            _require_pcsc_byte(sw1, "PC/SC status bytes must fit in one byte") << 8
+        ) | _require_pcsc_byte(sw2, "PC/SC status bytes must fit in one byte")
+        return ResponseAPDU(response_data, status_word)
