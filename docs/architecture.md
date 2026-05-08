@@ -24,7 +24,8 @@ technical references. License boundaries must be respected before any code reuse
   `pyscard` only when a real PC/SC reader is requested, exchanges short APDUs
   through a connection object, rejects malformed response data/status bytes
   outside the APDU byte range, and returns explicit setup errors when
-  `pyscard` or readers are unavailable.
+  `pyscard`, reader enumeration, readers, or reader connections are
+  unavailable.
 
 The first command boundary is deliberately small:
 

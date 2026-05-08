@@ -132,6 +132,21 @@ class SmartcardProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(PcscUnavailableError, "no PC/SC smartcard readers"):
             PcscTransport.from_first_reader(lambda: [])
 
+    def test_pcsc_transport_fails_clearly_when_reader_provider_fails(self) -> None:
+        def broken_provider() -> list[FakePcscReader]:
+            raise RuntimeError("native provider missing")
+
+        with self.assertRaisesRegex(PcscUnavailableError, "PC/SC reader provider failed"):
+            PcscTransport.from_first_reader(broken_provider)
+
+    def test_pcsc_transport_fails_clearly_when_reader_connection_fails(self) -> None:
+        class BrokenReader:
+            def createConnection(self) -> FakePcscConnection:
+                raise RuntimeError("reader is locked")
+
+        with self.assertRaisesRegex(PcscUnavailableError, "PC/SC reader connection failed"):
+            PcscTransport.from_first_reader(lambda: [BrokenReader()])
+
 
 if __name__ == "__main__":
     unittest.main()

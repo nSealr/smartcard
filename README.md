@@ -25,9 +25,9 @@ repository host a forked or custom JavaCard applet.
 - Tests against shared `NostrSeal/specs` event-id fixtures.
 - Optional PC/SC transport boundary that exchanges short APDUs through
   `pyscard` when available and fails clearly when PC/SC prerequisites or
-  readers are missing. It rejects malformed reader responses whose data or
-  status bytes are outside the APDU byte range. It is tested with fake
-  connections; no real card support is claimed yet.
+  readers are missing or connection setup fails. It rejects malformed reader
+  responses whose data or status bytes are outside the APDU byte range. It is
+  tested with fake connections; no real card support is claimed yet.
 
 Important trust boundary: the current smartcard model signs a 32-byte event id,
 not full event JSON. A display-less card can protect key material, but it cannot

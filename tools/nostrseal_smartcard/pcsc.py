@@ -49,13 +49,20 @@ class PcscTransport:
         provider = readers_provider or _pyscard_readers
         try:
             reader_list = list(provider())
+        except PcscUnavailableError:
+            raise
         except ImportError as error:
             raise PcscUnavailableError("pyscard is required for PC/SC transport") from error
+        except Exception as error:
+            raise PcscUnavailableError("PC/SC reader provider failed") from error
         if not reader_list:
             raise PcscUnavailableError("no PC/SC smartcard readers found")
 
-        connection = reader_list[0].createConnection()
-        connection.connect()
+        try:
+            connection = reader_list[0].createConnection()
+            connection.connect()
+        except Exception as error:
+            raise PcscUnavailableError("PC/SC reader connection failed") from error
         return cls(connection)
 
     def exchange(self, command: CommandAPDU) -> ResponseAPDU:
