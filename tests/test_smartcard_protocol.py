@@ -198,5 +198,14 @@ class SmartcardProtocolTests(unittest.TestCase):
             transport.exchange(command)
 
 
+class ProjectToolingTests(unittest.TestCase):
+    def test_makefile_detects_pip_in_tree_build_support(self) -> None:
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+
+        self.assertIn("PIP_IN_TREE_BUILD", makefile)
+        self.assertIn("install --use-feature=in-tree-build --help", makefile)
+        self.assertIn("install --disable-pip-version-check $$PIP_IN_TREE_BUILD .", makefile)
+
+
 if __name__ == "__main__":
     unittest.main()

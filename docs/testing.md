@@ -7,7 +7,9 @@ make ci
 ```
 
 The baseline runs repository verification, Python unit tests, bytecode
-compilation, and isolated `pip check`.
+compilation, and isolated `pip check`. Local package setup uses pip's
+in-tree build mode when the active pip version still exposes that compatibility
+flag; newer pip versions already build in place and leave the flag disabled.
 
 ## Implemented Tests
 
