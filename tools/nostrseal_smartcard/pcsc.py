@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable as IterableABC
 from dataclasses import dataclass
 from typing import Callable, Iterable, Protocol
 
@@ -30,6 +31,15 @@ def _require_pcsc_byte(value: int, message: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value < 0 or value > 0xFF:
         raise ValueError(message)
     return value
+
+
+def _response_data_to_bytes(data: Iterable[int]) -> bytes:
+    if not isinstance(data, IterableABC):
+        raise ValueError("PC/SC response data must be a byte iterable")
+    return bytes(
+        _require_pcsc_byte(byte, "PC/SC response data bytes must fit in one byte")
+        for byte in data
+    )
 
 
 def _pyscard_readers() -> Iterable[PcscReader]:
@@ -70,10 +80,7 @@ class PcscTransport:
             data, sw1, sw2 = self.connection.transmit(list(command.to_bytes()))
         except Exception as error:
             raise PcscUnavailableError("PC/SC APDU exchange failed") from error
-        response_data = bytes(
-            _require_pcsc_byte(byte, "PC/SC response data bytes must fit in one byte")
-            for byte in data
-        )
+        response_data = _response_data_to_bytes(data)
         status_word = (
             _require_pcsc_byte(sw1, "PC/SC status bytes must fit in one byte") << 8
         ) | _require_pcsc_byte(sw2, "PC/SC status bytes must fit in one byte")

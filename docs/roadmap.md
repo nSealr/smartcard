@@ -29,6 +29,11 @@ data and status values with deterministic APDU byte-range errors instead of
 leaking provider-specific Python type errors. Real-card compatibility is still
 unclaimed.
 
+Status note, 2026-05-09: the PC/SC boundary now rejects missing response data
+with a deterministic response-shape error before APDU construction. This keeps
+the fake-connection boundary aligned with the companion PC/SC response-shape
+hardening and still does not claim real-card compatibility.
+
 ## Later
 
 - Native audited adapter.

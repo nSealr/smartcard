@@ -124,6 +124,15 @@ class SmartcardProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "PC/SC response data bytes must fit in one byte"):
             transport.exchange(command)
 
+    def test_pcsc_transport_rejects_missing_response_data(self) -> None:
+        command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
+        connection = FakePcscConnection((None, 0x90, 0x00))  # type: ignore[arg-type]
+
+        transport = PcscTransport.from_first_reader(lambda: [FakePcscReader(connection)])
+
+        with self.assertRaisesRegex(ValueError, "PC/SC response data must be a byte iterable"):
+            transport.exchange(command)
+
     def test_pcsc_transport_rejects_out_of_range_status_bytes(self) -> None:
         command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
         connection = FakePcscConnection(([], 0x100, 0x00))
