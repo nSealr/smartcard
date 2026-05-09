@@ -27,7 +27,7 @@ ReadersProvider = Callable[[], Iterable[PcscReader]]
 
 
 def _require_pcsc_byte(value: int, message: str) -> int:
-    if value < 0 or value > 0xFF:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0 or value > 0xFF:
         raise ValueError(message)
     return value
 

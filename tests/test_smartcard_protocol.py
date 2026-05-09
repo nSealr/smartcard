@@ -115,9 +115,27 @@ class SmartcardProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "PC/SC response data bytes must fit in one byte"):
             transport.exchange(command)
 
+    def test_pcsc_transport_rejects_non_integer_response_data_bytes(self) -> None:
+        command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
+        connection = FakePcscConnection(([1.5], 0x90, 0x00))  # type: ignore[list-item]
+
+        transport = PcscTransport.from_first_reader(lambda: [FakePcscReader(connection)])
+
+        with self.assertRaisesRegex(ValueError, "PC/SC response data bytes must fit in one byte"):
+            transport.exchange(command)
+
     def test_pcsc_transport_rejects_out_of_range_status_bytes(self) -> None:
         command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
         connection = FakePcscConnection(([], 0x100, 0x00))
+
+        transport = PcscTransport.from_first_reader(lambda: [FakePcscReader(connection)])
+
+        with self.assertRaisesRegex(ValueError, "PC/SC status bytes must fit in one byte"):
+            transport.exchange(command)
+
+    def test_pcsc_transport_rejects_non_integer_status_bytes(self) -> None:
+        command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
+        connection = FakePcscConnection(([], 0x90, 0.5))  # type: ignore[arg-type]
 
         transport = PcscTransport.from_first_reader(lambda: [FakePcscReader(connection)])
 

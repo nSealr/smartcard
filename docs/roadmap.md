@@ -24,6 +24,11 @@ reader connection setup explicitly. APDU exchange failures are also normalized
 to a PC/SC transport error. It is fake-connection tested only; real Satochip,
 NostrKey, and reader captures remain pending.
 
+Status note, 2026-05-09: the PC/SC boundary now rejects non-integer response
+data and status values with deterministic APDU byte-range errors instead of
+leaking provider-specific Python type errors. Real-card compatibility is still
+unclaimed.
+
 ## Later
 
 - Native audited adapter.
