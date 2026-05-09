@@ -34,6 +34,11 @@ with a deterministic response-shape error before APDU construction. This keeps
 the fake-connection boundary aligned with the companion PC/SC response-shape
 hardening and still does not claim real-card compatibility.
 
+Status note, 2026-05-09: the PC/SC boundary now rejects malformed transmit
+results with deterministic response-shape errors before reading status bytes or
+data. This separates provider exchange failures from malformed provider
+responses while remaining fake-connection tested only.
+
 ## Later
 
 - Native audited adapter.

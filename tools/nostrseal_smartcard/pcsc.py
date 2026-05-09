@@ -42,6 +42,13 @@ def _response_data_to_bytes(data: Iterable[int]) -> bytes:
     )
 
 
+def _parse_transmit_result(result: object) -> tuple[Iterable[int], int, int]:
+    if not isinstance(result, tuple) or len(result) != 3:
+        raise ValueError("PC/SC transmit result must contain data, sw1, and sw2")
+    data, sw1, sw2 = result
+    return data, sw1, sw2
+
+
 def _pyscard_readers() -> Iterable[PcscReader]:
     try:
         from smartcard.System import readers
@@ -77,9 +84,10 @@ class PcscTransport:
 
     def exchange(self, command: CommandAPDU) -> ResponseAPDU:
         try:
-            data, sw1, sw2 = self.connection.transmit(list(command.to_bytes()))
+            result = self.connection.transmit(list(command.to_bytes()))
         except Exception as error:
             raise PcscUnavailableError("PC/SC APDU exchange failed") from error
+        data, sw1, sw2 = _parse_transmit_result(result)
         response_data = _response_data_to_bytes(data)
         status_word = (
             _require_pcsc_byte(sw1, "PC/SC status bytes must fit in one byte") << 8

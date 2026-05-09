@@ -26,9 +26,10 @@ repository host a forked or custom JavaCard applet.
 - Optional PC/SC transport boundary that exchanges short APDUs through
   `pyscard` when available and fails clearly when PC/SC prerequisites or
   readers are missing, connection setup fails, or APDU exchange fails. It
-  rejects malformed reader responses whose data is missing or whose data/status
-  bytes are non-integer values or outside the APDU byte range. It is tested
-  with fake connections; no real card support is claimed yet.
+  rejects malformed reader responses whose transmit-result shape is invalid,
+  whose data is missing, or whose data/status bytes are non-integer values or
+  outside the APDU byte range. It is tested with fake connections; no real card
+  support is claimed yet.
 
 Important trust boundary: the current smartcard model signs a 32-byte event id,
 not full event JSON. A display-less card can protect key material, but it cannot

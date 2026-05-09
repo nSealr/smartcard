@@ -22,9 +22,9 @@ technical references. License boundaries must be respected before any code reuse
 - `nostrseal_smartcard.simulator`: secp256k1-backed local simulator.
 - `nostrseal_smartcard.pcsc`: optional PC/SC transport boundary. It imports
   `pyscard` only when a real PC/SC reader is requested, exchanges short APDUs
-  through a connection object, rejects missing response data and malformed
-  response data/status bytes that are non-integer values or outside the APDU
-  byte range, and returns explicit setup errors when
+  through a connection object, rejects malformed transmit-result shape, missing
+  response data, and malformed response data/status bytes that are non-integer
+  values or outside the APDU byte range, and returns explicit setup errors when
   `pyscard`, reader enumeration, readers, reader connections, or APDU exchange
   are unavailable.
 

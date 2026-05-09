@@ -19,8 +19,8 @@ compilation, and isolated `pip check`.
 - Shared `NostrSeal/specs` APDU vector conformance tests.
 - PC/SC transport boundary tests with fake readers/connections and explicit
   unavailable-provider/no-reader/connection setup and APDU exchange errors.
-- PC/SC malformed-response tests for missing data plus non-integer or
-  out-of-range data and status bytes.
+- PC/SC malformed-response tests for malformed transmit-result shape, missing
+  data, and non-integer or out-of-range data and status bytes.
 - Single-repo CI falls back to fixture snapshots under `tests/fixtures/specs`
   when the sibling `NostrSeal/specs` checkout is not present. Cross-repo drift
   is still guarded by `NostrSeal/lab` integration checks.

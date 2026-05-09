@@ -133,6 +133,15 @@ class SmartcardProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "PC/SC response data must be a byte iterable"):
             transport.exchange(command)
 
+    def test_pcsc_transport_rejects_malformed_transmit_result(self) -> None:
+        command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
+        connection = FakePcscConnection(None)  # type: ignore[arg-type]
+
+        transport = PcscTransport.from_first_reader(lambda: [FakePcscReader(connection)])
+
+        with self.assertRaisesRegex(ValueError, "PC/SC transmit result must contain data, sw1, and sw2"):
+            transport.exchange(command)
+
     def test_pcsc_transport_rejects_out_of_range_status_bytes(self) -> None:
         command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))
         connection = FakePcscConnection(([], 0x100, 0x00))
