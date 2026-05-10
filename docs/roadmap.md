@@ -39,6 +39,11 @@ results with deterministic response-shape errors before reading status bytes or
 data. This separates provider exchange failures from malformed provider
 responses while remaining fake-connection tested only.
 
+Status note, 2026-05-10: the simulator now consumes shared APDU rejection
+vectors from `NostrSeal/specs` for wrong `SIGN_EVENT_ID` length, unsupported
+CLA, and unsupported INS status words. This hardens the display-less APDU
+contract without claiming real-card compatibility.
+
 ## Later
 
 - Native audited adapter.

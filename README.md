@@ -22,7 +22,8 @@ repository host a forked or custom JavaCard applet.
   `SIGN_EVENT_ID`.
 - secp256k1-backed simulator that returns x-only public keys and signs 32-byte
   Nostr event ids.
-- Tests against shared `NostrSeal/specs` event-id fixtures.
+- Tests against shared `NostrSeal/specs` event-id fixtures and APDU
+  status-word rejection vectors.
 - Optional PC/SC transport boundary that exchanges short APDUs through
   `pyscard` when available and fails clearly when PC/SC prerequisites or
   readers are missing, connection setup fails, or APDU exchange fails. It

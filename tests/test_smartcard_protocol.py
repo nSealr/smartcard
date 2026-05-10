@@ -28,6 +28,10 @@ KEY = json.loads((SPECS / "vectors/keys/test-key-1.json").read_text(encoding="ut
 BASIC_VECTOR = json.loads((SPECS / "vectors/events/kind-1-basic.json").read_text(encoding="utf-8"))
 GET_PUBLIC_KEY_VECTOR = json.loads((SPECS / "vectors/smartcard/get-public-key.json").read_text(encoding="utf-8"))
 SIGN_EVENT_ID_VECTOR = json.loads((SPECS / "vectors/smartcard/sign-event-id-kind-1-basic.json").read_text(encoding="utf-8"))
+SMARTCARD_APDU_VECTORS = {
+    path.stem: json.loads(path.read_text(encoding="utf-8"))
+    for path in sorted((SPECS / "vectors/smartcard").glob("*.json"))
+}
 
 
 class FakePcscConnection:
@@ -90,6 +94,18 @@ class SmartcardProtocolTests(unittest.TestCase):
                 response.data.hex(),
             )
         )
+
+    def test_simulator_matches_shared_apdu_error_status_vectors(self) -> None:
+        simulator = SmartcardSimulator(KEY["secret_key"])
+
+        for name in ("sign-event-id-wrong-length", "unsupported-cla", "unsupported-ins"):
+            with self.subTest(name=name):
+                vector = SMARTCARD_APDU_VECTORS[name]
+                command = CommandAPDU.from_bytes(bytes.fromhex(vector["command_hex"]))
+                response = simulator.exchange(command)
+
+                self.assertEqual(f"{response.status_word:04x}", vector["expected_status_word"])
+                self.assertEqual(response.to_bytes().hex(), vector["response_hex"])
 
     def test_pcsc_transport_exchanges_short_apdus_with_connection(self) -> None:
         command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))

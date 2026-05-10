@@ -18,7 +18,9 @@ flag; newer pip versions already build in place and leave the flag disabled.
 - `GET_PUBLIC_KEY` simulator response.
 - `SIGN_EVENT_ID` simulator response with Schnorr verification against shared
   `NostrSeal/specs` fixtures.
-- Shared `NostrSeal/specs` APDU vector conformance tests.
+- Shared `NostrSeal/specs` APDU vector conformance tests, including
+  deterministic wrong-length, unsupported-CLA, and unsupported-INS status-word
+  responses.
 - PC/SC transport boundary tests with fake readers/connections and explicit
   unavailable-provider/no-reader/connection setup and APDU exchange errors.
 - PC/SC malformed-response tests for malformed transmit-result shape, missing
