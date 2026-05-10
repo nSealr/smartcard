@@ -1,11 +1,14 @@
+import io
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from nostrseal_smartcard.apdu import CommandAPDU, ResponseAPDU
+from nostrseal_smartcard import cli as smartcard_cli
 from nostrseal_smartcard.pcsc import PcscTransport, PcscUnavailableError
 from nostrseal_smartcard.protocol import (
     INS_GET_PUBLIC_KEY,
@@ -283,22 +286,14 @@ class SmartcardCliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_root:
             output_path = Path(temp_root) / "public-key.json"
 
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    "-m",
-                    "nostrseal_smartcard",
-                    "pcsc-get-public-key",
-                    "--out",
-                    str(output_path),
-                ],
-                cwd=ROOT,
-                capture_output=True,
-                text=True,
-            )
+            with patch(
+                "nostrseal_smartcard.cli.PcscTransport.from_first_reader",
+                side_effect=PcscUnavailableError("pyscard is required for PC/SC transport"),
+            ), patch("sys.stderr", new_callable=io.StringIO) as stderr:
+                result = smartcard_cli.main(["pcsc-get-public-key", "--out", str(output_path)])
 
-            self.assertNotEqual(result.returncode, 0)
-            self.assertIn("pyscard is required for PC/SC transport", result.stderr)
+            self.assertEqual(result, 1)
+            self.assertIn("pyscard is required for PC/SC transport", stderr.getvalue())
             self.assertFalse(output_path.exists())
 
 
