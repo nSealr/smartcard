@@ -1,4 +1,7 @@
 import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -214,7 +217,98 @@ class SmartcardProtocolTests(unittest.TestCase):
             transport.exchange(command)
 
 
+class SmartcardCliTests(unittest.TestCase):
+    def test_cli_sim_get_public_key_writes_apdu_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "public-key.json"
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "nostrseal_smartcard",
+                    "sim-get-public-key",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--out",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+
+            output = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(output["transport"], "simulator")
+            self.assertEqual(output["command_hex"], GET_PUBLIC_KEY_VECTOR["command_hex"])
+            self.assertEqual(output["response_hex"], GET_PUBLIC_KEY_VECTOR["response_hex"])
+            self.assertEqual(output["status_word"], GET_PUBLIC_KEY_VECTOR["status_word"])
+            self.assertEqual(output["public_key"], GET_PUBLIC_KEY_VECTOR["response_data_hex"])
+
+    def test_cli_sim_sign_event_id_writes_apdu_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "signature.json"
+
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "nostrseal_smartcard",
+                    "sim-sign-event-id",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--event-id",
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--out",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+
+            output = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(output["transport"], "simulator")
+            self.assertEqual(output["command_hex"], SIGN_EVENT_ID_VECTOR["command_hex"])
+            self.assertEqual(output["status_word"], SIGN_EVENT_ID_VECTOR["expected_status_word"])
+            self.assertEqual(output["event_id"], SIGN_EVENT_ID_VECTOR["event_id"])
+            self.assertEqual(len(output["signature"]), 128)
+            self.assertTrue(
+                verify_schnorr_signature(
+                    SIGN_EVENT_ID_VECTOR["verification_pubkey"],
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    output["signature"],
+                )
+            )
+
+    def test_cli_pcsc_get_public_key_fails_cleanly_without_pcsc(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "public-key.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "nostrseal_smartcard",
+                    "pcsc-get-public-key",
+                    "--out",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("pyscard is required for PC/SC transport", result.stderr)
+            self.assertFalse(output_path.exists())
+
+
 class ProjectToolingTests(unittest.TestCase):
+    def test_pyproject_exposes_smartcard_cli_entry_point(self) -> None:
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+        self.assertIn("[project.scripts]", pyproject)
+        self.assertIn("nseal-smartcard", pyproject)
+
     def test_makefile_detects_pip_in_tree_build_support(self) -> None:
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
 

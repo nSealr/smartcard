@@ -21,6 +21,10 @@ flag; newer pip versions already build in place and leave the flag disabled.
 - Shared `NostrSeal/specs` APDU vector conformance tests, including
   deterministic wrong-length, unsupported-CLA, and unsupported-INS status-word
   responses.
+- CLI simulator report tests for `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`, plus
+  entry-point packaging coverage for `nseal-smartcard`.
+- CLI PC/SC probe test proving the command fails clearly and writes no output
+  when `pyscard` or a reader is unavailable.
 - PC/SC transport boundary tests with fake readers/connections and explicit
   unavailable-provider/no-reader/connection setup and APDU exchange errors.
 - PC/SC malformed-response tests for malformed transmit-result shape, missing
@@ -31,10 +35,8 @@ flag; newer pip versions already build in place and leave the flag disabled.
 
 ## Required Tests
 
-- APDU fixture tests.
 - Real PC/SC reader/card tests when hardware is available.
 - pysatochip compatibility checks where available.
 - Shared vector signing tests with a real card when hardware is available.
-- Simulator fallback when hardware is not available.
 
 Display-less cards must not be represented as trusted event review devices.

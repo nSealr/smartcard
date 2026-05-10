@@ -9,6 +9,9 @@ description = "APDU protocol foundation for NostrSeal smartcard experiments"
 requires-python = ">=3.9"
 dependencies = ["secp256k1==0.14.0"]
 
+[project.scripts]
+nseal-smartcard = "nostrseal_smartcard.cli:main"
+
 [tool.setuptools]
 package-dir = {"" = "tools"}
 

@@ -27,6 +27,10 @@ technical references. License boundaries must be respected before any code reuse
   values or outside the APDU byte range, and returns explicit setup errors when
   `pyscard`, reader enumeration, readers, reader connections, or APDU exchange
   are unavailable.
+- `nostrseal_smartcard.cli`: simulator and PC/SC probe commands for
+  `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`. Simulator commands are deterministic
+  development tools; PC/SC commands are probe tooling and do not establish
+  real-card compatibility by themselves.
 
 The first command boundary is deliberately small:
 

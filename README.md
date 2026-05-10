@@ -31,6 +31,10 @@ repository host a forked or custom JavaCard applet.
   whose data is missing, or whose data/status bytes are non-integer values or
   outside the APDU byte range. It is tested with fake connections; no real card
   support is claimed yet.
+- `nseal-smartcard` / `python -m nostrseal_smartcard` CLI helpers for simulator
+  `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` reports plus future PC/SC
+  `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` probes. PC/SC commands fail clearly when
+  `pyscard` or a reader is unavailable and do not claim real-card support.
 
 Important trust boundary: the current smartcard model signs a 32-byte event id,
 not full event JSON. A display-less card can protect key material, but it cannot

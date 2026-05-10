@@ -44,6 +44,12 @@ vectors from `NostrSeal/specs` for wrong `SIGN_EVENT_ID` length, unsupported
 CLA, and unsupported INS status words. This hardens the display-less APDU
 contract without claiming real-card compatibility.
 
+Status note, 2026-05-10: `nseal-smartcard` now exposes simulator
+`GET_PUBLIC_KEY` and `SIGN_EVENT_ID` report commands plus PC/SC probe commands
+for the same APDU operations. The PC/SC path still uses the optional
+fake-tested transport boundary and fails clearly when `pyscard` or a reader is
+unavailable; this does not claim real-card compatibility.
+
 ## Later
 
 - Native audited adapter.
