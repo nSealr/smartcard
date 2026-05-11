@@ -41,6 +41,19 @@ This mirrors what display-less smartcards can realistically do without a trusted
 screen. The companion or another trusted review device must still compute and
 review the event before sending the digest to the card.
 
+## Identity And Policy Boundary
+
+The shared `nseal-account-descriptor-v0` smartcard route descriptor is pending.
+It must not be added until real card slot behavior, PIN/PUK policy,
+provisioning, export policy, and backup/recovery semantics are verified from
+sources or hardware captures.
+
+The eventual route can protect a key inside a display-less card, but it must
+not claim trusted event review. It must require external review
+acknowledgement, bind the event id to an `approval_digest` produced by the
+companion or another trusted review device, and clearly report whether a policy
+path, manual path, or refusal path produced the APDU request.
+
 Tests consume APDU vectors from `NostrSeal/specs` so command bytes, response
 expectations, and deterministic rejection status words remain shared across
 implementations.

@@ -54,6 +54,13 @@ for the same APDU operations. The PC/SC path still uses the optional
 fake-tested transport boundary and fails clearly when `pyscard` or a reader is
 unavailable; this does not claim real-card compatibility.
 
+Status note, 2026-05-11: identity/policy integration remains intentionally
+blocked. The `nseal-account-descriptor-v0` smartcard route descriptor is
+pending until card slot, PIN, provisioning, export, backup, and real-card APDU
+behavior are source-backed. Any future descriptor must keep the card
+display-less, require external review acknowledgement, and bind the signed
+event id to an `approval_digest` before companion publication.
+
 ## Later
 
 - Native audited adapter.

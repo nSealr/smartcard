@@ -63,6 +63,24 @@ class FakePcscReader:
 
 
 class SmartcardProtocolTests(unittest.TestCase):
+    def test_docs_keep_smartcard_identity_policy_boundary_displayless(self) -> None:
+        docs = "\n".join(
+            [
+                (ROOT / "README.md").read_text(encoding="utf-8"),
+                (ROOT / "docs/architecture.md").read_text(encoding="utf-8"),
+                (ROOT / "docs/roadmap.md").read_text(encoding="utf-8"),
+                (ROOT / "docs/testing.md").read_text(encoding="utf-8"),
+            ]
+        )
+
+        self.assertIn("nseal-account-descriptor-v0", docs)
+        self.assertIn("smartcard route descriptor is pending", docs)
+        self.assertIn("external review acknowledgement", docs)
+        self.assertIn("approval_digest", docs)
+        self.assertIn("display-less", docs)
+        self.assertIn("cannot provide trusted event review by itself", docs.replace("\n", " "))
+        self.assertNotIn("provides trusted event review by itself", docs.lower())
+
     def test_short_apdu_encoding_round_trip(self) -> None:
         command = CommandAPDU(NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes.fromhex(SIGN_EVENT_ID_VECTOR["event_id"]))
         encoded = command.to_bytes()
