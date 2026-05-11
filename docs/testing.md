@@ -20,7 +20,10 @@ flag; newer pip versions already build in place and leave the flag disabled.
   `NostrSeal/specs` fixtures.
 - Shared `NostrSeal/specs` APDU vector conformance tests, including
   deterministic wrong-length, unsupported-CLA, and unsupported-INS status-word
-  responses.
+  responses. Rejection-vector discovery is directory-driven for every
+  smartcard vector that carries both `expected_status_word` and `response_hex`,
+  so future APDU rejection fixtures are picked up without a hand-written name
+  list.
 - CLI simulator report tests for `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`, plus
   entry-point packaging coverage for `nseal-smartcard`.
 - CLI PC/SC probe test proving the command fails clearly and writes no output

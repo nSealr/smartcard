@@ -103,10 +103,15 @@ class SmartcardProtocolTests(unittest.TestCase):
 
     def test_simulator_matches_shared_apdu_error_status_vectors(self) -> None:
         simulator = SmartcardSimulator(KEY["secret_key"])
+        rejection_vectors = [
+            vector
+            for vector in SMARTCARD_APDU_VECTORS.values()
+            if "expected_status_word" in vector and "response_hex" in vector
+        ]
+        self.assertGreaterEqual(len(rejection_vectors), 3)
 
-        for name in ("sign-event-id-wrong-length", "unsupported-cla", "unsupported-ins"):
-            with self.subTest(name=name):
-                vector = SMARTCARD_APDU_VECTORS[name]
+        for vector in rejection_vectors:
+            with self.subTest(name=vector["name"]):
                 command = CommandAPDU.from_bytes(bytes.fromhex(vector["command_hex"]))
                 response = simulator.exchange(command)
 
