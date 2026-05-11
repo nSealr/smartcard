@@ -58,6 +58,13 @@ Tests consume APDU vectors from `NostrSeal/specs` so command bytes, response
 expectations, and deterministic rejection status words remain shared across
 implementations.
 
+Feature target and current status live in `NostrSeal/specs`
+`vectors/features/signer-feature-matrix-v0.json`. The smartcard repository
+must not claim device-display features, but features it does implement, such as
+APDUs, external review acknowledgement, BIP-340 signing, and response
+verification, must use the shared `contract_id` so behavior stays aligned with
+the companion and other signer families.
+
 The PC/SC boundary is not proof of real-card compatibility. It is the adapter
 shape that future Satochip/NostrKey captures and hardware tests should drive
 once cards and readers are available.

@@ -45,6 +45,13 @@ Important trust boundary: the current smartcard model signs a 32-byte event id,
 not full event JSON. A display-less card can protect key material, but it
 cannot provide trusted event review by itself.
 
+Feature target and current status are tracked in `NostrSeal/specs`
+`vectors/features/signer-feature-matrix-v0.json`. The smartcard line may omit
+device-display features because the card is display-less, but shared features
+such as request validation, BIP-340 signing, APDU behavior, external review
+acknowledgement, and response verification must follow the shared
+`contract_id` when implemented.
+
 ## Initial Layout
 
 - `applet/`: custom or forked JavaCard applet work.
