@@ -54,6 +54,11 @@ acknowledgement, bind the event id to an `approval_digest` produced by the
 companion or another trusted review device, and clearly report whether a policy
 path, manual path, or refusal path produced the APDU request.
 
+Smartcard accounts are slot-backed public keys. If a card exposes multiple
+slots, policy attaches to the selected slot public key and route, not to the
+card as one global policy object. The current product model does not give the
+display-less card autonomous scoped policy automation in v0.
+
 Tests consume APDU vectors from `NostrSeal/specs` so command bytes, response
 expectations, and deterministic rejection status words remain shared across
 implementations.

@@ -40,6 +40,9 @@ repository host a forked or custom JavaCard applet.
   card slot, PIN, provisioning, export, and backup behavior are source-backed.
   Any future smartcard route must require external review acknowledgement and
   `approval_digest` binding because the card is display-less.
+  If multiple card slots are supported, each slot public key is its own account
+  and policy subject. The card must not be presented as a trusted policy or
+  event-review surface by itself.
 
 Important trust boundary: the current smartcard model signs a 32-byte event id,
 not full event JSON. A display-less card can protect key material, but it
