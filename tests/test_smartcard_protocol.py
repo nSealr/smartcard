@@ -7,16 +7,16 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from nostrseal_smartcard.apdu import CommandAPDU, ResponseAPDU
-from nostrseal_smartcard import cli as smartcard_cli
-from nostrseal_smartcard.pcsc import PcscTransport, PcscUnavailableError
-from nostrseal_smartcard.protocol import (
+from nsealr_smartcard.apdu import CommandAPDU, ResponseAPDU
+from nsealr_smartcard import cli as smartcard_cli
+from nsealr_smartcard.pcsc import PcscTransport, PcscUnavailableError
+from nsealr_smartcard.protocol import (
     INS_GET_PUBLIC_KEY,
     INS_SIGN_EVENT_ID,
-    NOSTRSEAL_CLA,
+    NSEALR_CLA,
     SW_NO_ERROR,
 )
-from nostrseal_smartcard.simulator import SmartcardSimulator, verify_schnorr_signature
+from nsealr_smartcard.simulator import SmartcardSimulator, verify_schnorr_signature
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -73,7 +73,7 @@ class SmartcardProtocolTests(unittest.TestCase):
             ]
         )
 
-        self.assertIn("nseal-account-descriptor-v0", docs)
+        self.assertIn("nsealr-account-descriptor-v0", docs)
         self.assertIn("smartcard route descriptor is pending", docs)
         self.assertIn("external review acknowledgement", docs)
         self.assertIn("approval_digest", docs)
@@ -82,16 +82,16 @@ class SmartcardProtocolTests(unittest.TestCase):
         self.assertNotIn("provides trusted event review by itself", docs.lower())
 
     def test_short_apdu_encoding_round_trip(self) -> None:
-        command = CommandAPDU(NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes.fromhex(SIGN_EVENT_ID_VECTOR["event_id"]))
+        command = CommandAPDU(NSEALR_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes.fromhex(SIGN_EVENT_ID_VECTOR["event_id"]))
         encoded = command.to_bytes()
 
         self.assertEqual(encoded.hex(), SIGN_EVENT_ID_VECTOR["command_hex"])
-        self.assertEqual(encoded[:5], bytes([NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, 32]))
+        self.assertEqual(encoded[:5], bytes([NSEALR_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, 32]))
         self.assertEqual(CommandAPDU.from_bytes(encoded), command)
 
     def test_short_apdu_rejects_oversized_payloads(self) -> None:
         with self.assertRaisesRegex(ValueError, "short APDU data cannot exceed 255 bytes"):
-            CommandAPDU(NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes(256)).to_bytes()
+            CommandAPDU(NSEALR_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes(256)).to_bytes()
 
     def test_get_public_key_apdu(self) -> None:
         simulator = SmartcardSimulator(KEY["secret_key"])
@@ -252,7 +252,7 @@ class SmartcardCliTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "nostrseal_smartcard",
+                    "nsealr_smartcard",
                     "sim-get-public-key",
                     "--secret-key",
                     KEY["secret_key"],
@@ -278,7 +278,7 @@ class SmartcardCliTests(unittest.TestCase):
                 [
                     sys.executable,
                     "-m",
-                    "nostrseal_smartcard",
+                    "nsealr_smartcard",
                     "sim-sign-event-id",
                     "--secret-key",
                     KEY["secret_key"],
@@ -310,7 +310,7 @@ class SmartcardCliTests(unittest.TestCase):
             output_path = Path(temp_root) / "public-key.json"
 
             with patch(
-                "nostrseal_smartcard.cli.PcscTransport.from_first_reader",
+                "nsealr_smartcard.cli.PcscTransport.from_first_reader",
                 side_effect=PcscUnavailableError("pyscard is required for PC/SC transport"),
             ), patch("sys.stderr", new_callable=io.StringIO) as stderr:
                 result = smartcard_cli.main(["pcsc-get-public-key", "--out", str(output_path)])
@@ -325,7 +325,7 @@ class ProjectToolingTests(unittest.TestCase):
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
         self.assertIn("[project.scripts]", pyproject)
-        self.assertIn("nseal-smartcard", pyproject)
+        self.assertIn("nsealr-smartcard", pyproject)
 
     def test_makefile_detects_pip_in_tree_build_support(self) -> None:
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")

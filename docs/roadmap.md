@@ -40,7 +40,7 @@ data. This separates provider exchange failures from malformed provider
 responses while remaining fake-connection tested only.
 
 Status note, 2026-05-10: the simulator now consumes shared APDU rejection
-vectors from `NostrSeal/specs` for wrong `SIGN_EVENT_ID` length, unsupported
+vectors from `nSealr/specs` for wrong `SIGN_EVENT_ID` length, unsupported
 CLA, and unsupported INS status words. This hardens the display-less APDU
 contract without claiming real-card compatibility.
 
@@ -48,14 +48,14 @@ Status note, 2026-05-11: APDU rejection-vector tests now discover every shared
 smartcard vector with an `expected_status_word` and fixed `response_hex`
 instead of naming individual rejection files.
 
-Status note, 2026-05-10: `nseal-smartcard` now exposes simulator
+Status note, 2026-05-10: `nsealr-smartcard` now exposes simulator
 `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` report commands plus PC/SC probe commands
 for the same APDU operations. The PC/SC path still uses the optional
 fake-tested transport boundary and fails clearly when `pyscard` or a reader is
 unavailable; this does not claim real-card compatibility.
 
 Status note, 2026-05-11: identity/policy integration remains intentionally
-blocked. The `nseal-account-descriptor-v0` smartcard route descriptor is
+blocked. The `nsealr-account-descriptor-v0` smartcard route descriptor is
 pending until card slot, PIN, provisioning, export, backup, and real-card APDU
 behavior are source-backed. Any future descriptor must keep the card
 display-less, require external review acknowledgement, and bind the signed

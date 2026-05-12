@@ -3,14 +3,14 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "nostrseal-smartcard"
+name = "nsealr-smartcard"
 version = "0.1.0"
-description = "APDU protocol foundation for NostrSeal smartcard experiments"
+description = "APDU protocol foundation for nSealr smartcard experiments"
 requires-python = ">=3.9"
 dependencies = ["secp256k1==0.14.0"]
 
 [project.scripts]
-nseal-smartcard = "nostrseal_smartcard.cli:main"
+nsealr-smartcard = "nsealr_smartcard.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "tools"}

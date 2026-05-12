@@ -1,6 +1,6 @@
 # Architecture
 
-`NostrSeal/smartcard` researches JavaCard, NFC, and contact smartcard signing.
+`nSealr/smartcard` researches JavaCard, NFC, and contact smartcard signing.
 
 ## Responsibilities
 
@@ -17,17 +17,17 @@ technical references. License boundaries must be respected before any code reuse
 
 ## Implemented Foundation
 
-- `nostrseal_smartcard.apdu`: short APDU command/response encoding.
-- `nostrseal_smartcard.protocol`: NostrSeal CLA/INS/status-word constants.
-- `nostrseal_smartcard.simulator`: secp256k1-backed local simulator.
-- `nostrseal_smartcard.pcsc`: optional PC/SC transport boundary. It imports
+- `nsealr_smartcard.apdu`: short APDU command/response encoding.
+- `nsealr_smartcard.protocol`: nSealr CLA/INS/status-word constants.
+- `nsealr_smartcard.simulator`: secp256k1-backed local simulator.
+- `nsealr_smartcard.pcsc`: optional PC/SC transport boundary. It imports
   `pyscard` only when a real PC/SC reader is requested, exchanges short APDUs
   through a connection object, rejects malformed transmit-result shape, missing
   response data, and malformed response data/status bytes that are non-integer
   values or outside the APDU byte range, and returns explicit setup errors when
   `pyscard`, reader enumeration, readers, reader connections, or APDU exchange
   are unavailable.
-- `nostrseal_smartcard.cli`: simulator and PC/SC probe commands for
+- `nsealr_smartcard.cli`: simulator and PC/SC probe commands for
   `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`. Simulator commands are deterministic
   development tools; PC/SC commands are probe tooling and do not establish
   real-card compatibility by themselves.
@@ -43,7 +43,7 @@ review the event before sending the digest to the card.
 
 ## Identity And Policy Boundary
 
-The shared `nseal-account-descriptor-v0` smartcard route descriptor is pending.
+The shared `nsealr-account-descriptor-v0` smartcard route descriptor is pending.
 It must not be added until real card slot behavior, PIN/PUK policy,
 provisioning, export policy, and backup/recovery semantics are verified from
 sources or hardware captures.
@@ -59,11 +59,11 @@ slots, policy attaches to the selected slot public key and route, not to the
 card as one global policy object. The current product model does not give the
 display-less card autonomous scoped policy automation in v0.
 
-Tests consume APDU vectors from `NostrSeal/specs` so command bytes, response
+Tests consume APDU vectors from `nSealr/specs` so command bytes, response
 expectations, and deterministic rejection status words remain shared across
 implementations.
 
-Feature target and current status live in `NostrSeal/specs`
+Feature target and current status live in `nSealr/specs`
 `vectors/features/signer-feature-matrix-v0.json`. The smartcard repository
 must not claim device-display features, but features it does implement, such as
 APDUs, external review acknowledgement, BIP-340 signing, and response

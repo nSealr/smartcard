@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .apdu import CommandAPDU, ResponseAPDU
 from .pcsc import PcscTransport, PcscUnavailableError
-from .protocol import INS_GET_PUBLIC_KEY, INS_SIGN_EVENT_ID, NOSTRSEAL_CLA, SW_NO_ERROR
+from .protocol import INS_GET_PUBLIC_KEY, INS_SIGN_EVENT_ID, NSEALR_CLA, SW_NO_ERROR
 from .simulator import SmartcardSimulator
 
 
@@ -34,11 +34,11 @@ def _status_word(response: ResponseAPDU) -> str:
 
 
 def _get_public_key_command() -> CommandAPDU:
-    return CommandAPDU(NOSTRSEAL_CLA, INS_GET_PUBLIC_KEY)
+    return CommandAPDU(NSEALR_CLA, INS_GET_PUBLIC_KEY)
 
 
 def _sign_event_id_command(event_id: str) -> CommandAPDU:
-    return CommandAPDU(NOSTRSEAL_CLA, INS_SIGN_EVENT_ID, data=bytes.fromhex(event_id))
+    return CommandAPDU(NSEALR_CLA, INS_SIGN_EVENT_ID, data=bytes.fromhex(event_id))
 
 
 def _public_key_report(transport: str, command: CommandAPDU, response: ResponseAPDU) -> dict[str, object]:
@@ -96,7 +96,7 @@ def _pcsc_sign_event_id(args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="nseal-smartcard")
+    parser = argparse.ArgumentParser(prog="nsealr-smartcard")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     sim_public_key = subparsers.add_parser("sim-get-public-key", help="Run GET_PUBLIC_KEY against the simulator")

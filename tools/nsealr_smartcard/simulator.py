@@ -8,7 +8,7 @@ from .apdu import CommandAPDU, ResponseAPDU
 from .protocol import (
     INS_GET_PUBLIC_KEY,
     INS_SIGN_EVENT_ID,
-    NOSTRSEAL_CLA,
+    NSEALR_CLA,
     SW_CLA_NOT_SUPPORTED,
     SW_INS_NOT_SUPPORTED,
     SW_NO_ERROR,
@@ -65,7 +65,7 @@ class SmartcardSimulator:
         self._private_key = _private_key(secret_key_hex)
 
     def exchange(self, command: CommandAPDU) -> ResponseAPDU:
-        if command.cla != NOSTRSEAL_CLA:
+        if command.cla != NSEALR_CLA:
             return ResponseAPDU(status_word=SW_CLA_NOT_SUPPORTED)
         if command.ins == INS_GET_PUBLIC_KEY:
             if command.data:

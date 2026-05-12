@@ -17,15 +17,15 @@ flag; newer pip versions already build in place and leave the flag disabled.
 - Short APDU oversized payload rejection.
 - `GET_PUBLIC_KEY` simulator response.
 - `SIGN_EVENT_ID` simulator response with Schnorr verification against shared
-  `NostrSeal/specs` fixtures.
-- Shared `NostrSeal/specs` APDU vector conformance tests, including
+  `nSealr/specs` fixtures.
+- Shared `nSealr/specs` APDU vector conformance tests, including
   deterministic wrong-length, unsupported-CLA, and unsupported-INS status-word
   responses. Rejection-vector discovery is directory-driven for every
   smartcard vector that carries both `expected_status_word` and `response_hex`,
   so future APDU rejection fixtures are picked up without a hand-written name
   list.
 - CLI simulator report tests for `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`, plus
-  entry-point packaging coverage for `nseal-smartcard`.
+  entry-point packaging coverage for `nsealr-smartcard`.
 - CLI PC/SC probe test proving the command fails clearly and writes no output
   when `pyscard` or a reader is unavailable.
 - PC/SC transport boundary tests with fake readers/connections and explicit
@@ -33,12 +33,12 @@ flag; newer pip versions already build in place and leave the flag disabled.
 - PC/SC malformed-response tests for malformed transmit-result shape, missing
   data, and non-integer or out-of-range data and status bytes.
 - Documentation boundary tests requiring the pending
-  `nseal-account-descriptor-v0` smartcard route descriptor to stay display-less,
+  `nsealr-account-descriptor-v0` smartcard route descriptor to stay display-less,
   externally reviewed, and `approval_digest` bound before any production
   identity/policy claim.
 - Single-repo CI falls back to fixture snapshots under `tests/fixtures/specs`
-  when the sibling `NostrSeal/specs` checkout is not present. Cross-repo drift
-  is still guarded by `NostrSeal/lab` integration checks.
+  when the sibling `nSealr/specs` checkout is not present. Cross-repo drift
+  is still guarded by `nSealr/lab` integration checks.
 
 ## Required Tests
 
