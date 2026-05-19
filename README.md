@@ -32,9 +32,10 @@ repository host a forked or custom JavaCard applet.
   outside the APDU byte range. It is tested with fake connections; no real card
   support is claimed yet.
 - `nsealr-smartcard` / `python -m nsealr_smartcard` CLI helpers for simulator
-  `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` reports plus future PC/SC
-  `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` probes. PC/SC commands fail clearly when
-  `pyscard` or a reader is unavailable and do not claim real-card support.
+  `GET_PUBLIC_KEY`, `SIGN_EVENT_ID`, and raw APDU exchange reports plus future
+  PC/SC `GET_PUBLIC_KEY`, `SIGN_EVENT_ID`, and raw APDU probes. PC/SC commands
+  fail clearly when `pyscard` or a reader is unavailable and do not claim
+  real-card support.
   `SIGN_EVENT_ID` report commands require explicit
   `--review-acknowledged` and `--approval-digest` flags because the smartcard
   cannot review full event JSON on its own display.

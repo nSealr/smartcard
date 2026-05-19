@@ -25,13 +25,18 @@ flag; newer pip versions already build in place and leave the flag disabled.
   smartcard vector that carries both `expected_status_word` and `response_hex`,
   so future APDU rejection fixtures are picked up without a hand-written name
   list.
-- CLI simulator report tests for `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`, plus
-  entry-point packaging coverage for `nsealr-smartcard`. `SIGN_EVENT_ID`
+- CLI simulator report tests for `GET_PUBLIC_KEY`, `SIGN_EVENT_ID`, and raw
+  APDU exchange, plus entry-point packaging coverage for `nsealr-smartcard`.
+  Raw APDU exchange tests replay every shared smartcard vector that has a fixed
+  `response_hex`, including P1/P2 and Le rejection fixtures. `SIGN_EVENT_ID`
   report tests require `--review-acknowledged` and a valid lowercase
   `--approval-digest`, and prove malformed or missing review acknowledgement
   writes no output.
 - CLI PC/SC probe test proving the command fails clearly and writes no output
   when `pyscard` or a reader is unavailable.
+- CLI PC/SC raw APDU report test with a fake reader, proving the command writes
+  command bytes, response bytes, and status words through the same transport
+  boundary without claiming real-card compatibility.
 - PC/SC transport boundary tests with fake readers/connections and explicit
   unavailable-provider/no-reader/connection setup and APDU exchange errors.
 - PC/SC malformed-response tests for malformed transmit-result shape, missing

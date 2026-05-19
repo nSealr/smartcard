@@ -59,6 +59,12 @@ for the same APDU operations. The PC/SC path still uses the optional
 fake-tested transport boundary and fails clearly when `pyscard` or a reader is
 unavailable; this does not claim real-card compatibility.
 
+Status note, 2026-05-19: `nsealr-smartcard` now also exposes raw APDU exchange
+commands for the simulator and PC/SC boundary. The simulator path is used to
+replay fixed-response shared APDU vectors directly, including P1/P2 and Le
+rejections. The PC/SC path remains a probe/capture tool and is not a real-card
+compatibility claim.
+
 Status note, 2026-05-19: display-less `SIGN_EVENT_ID` report commands now
 require `--review-acknowledged` and `--approval-digest`. The APDU remains a
 32-byte event-id signing primitive, but the CLI report boundary no longer

@@ -29,6 +29,12 @@ def _approval_digest(value: str) -> str:
     return _hex32(value, "approval digest")
 
 
+def _command_hex(value: str) -> str:
+    if len(value) < 8 or len(value) % 2 != 0 or any(char not in "0123456789abcdef" for char in value):
+        raise argparse.ArgumentTypeError("command hex must be even-length lowercase hex with at least four APDU header bytes")
+    return value
+
+
 def _write_json(path: Path, value: dict[str, object]) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -43,6 +49,22 @@ def _get_public_key_command() -> CommandAPDU:
 
 def _sign_event_id_command(event_id: str) -> CommandAPDU:
     return CommandAPDU(NSEALR_CLA, INS_SIGN_EVENT_ID, data=bytes.fromhex(event_id))
+
+
+def _command_from_hex(command_hex: str) -> CommandAPDU:
+    return CommandAPDU.from_bytes(bytes.fromhex(command_hex))
+
+
+def _apdu_exchange_report(transport: str, command: CommandAPDU, response: ResponseAPDU) -> dict[str, object]:
+    report: dict[str, object] = {
+        "transport": transport,
+        "command_hex": command.to_bytes().hex(),
+        "response_hex": response.to_bytes().hex(),
+        "status_word": _status_word(response),
+    }
+    if response.data:
+        report["response_data_hex"] = response.data.hex()
+    return report
 
 
 def _public_key_report(transport: str, command: CommandAPDU, response: ResponseAPDU) -> dict[str, object]:
@@ -91,6 +113,12 @@ def _sim_sign_event_id(args: argparse.Namespace) -> None:
     _write_json(args.out, _signature_report("simulator", command, response, args.event_id, args.approval_digest))
 
 
+def _sim_exchange_apdu(args: argparse.Namespace) -> None:
+    command = _command_from_hex(args.command_hex)
+    response = SmartcardSimulator(args.secret_key).exchange(command)
+    _write_json(args.out, _apdu_exchange_report("simulator", command, response))
+
+
 def _pcsc_get_public_key(args: argparse.Namespace) -> None:
     command = _get_public_key_command()
     response = PcscTransport.from_first_reader().exchange(command)
@@ -101,6 +129,12 @@ def _pcsc_sign_event_id(args: argparse.Namespace) -> None:
     command = _sign_event_id_command(args.event_id)
     response = PcscTransport.from_first_reader().exchange(command)
     _write_json(args.out, _signature_report("pcsc", command, response, args.event_id, args.approval_digest))
+
+
+def _pcsc_exchange_apdu(args: argparse.Namespace) -> None:
+    command = _command_from_hex(args.command_hex)
+    response = PcscTransport.from_first_reader().exchange(command)
+    _write_json(args.out, _apdu_exchange_report("pcsc", command, response))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -130,6 +164,12 @@ def build_parser() -> argparse.ArgumentParser:
     sim_sign.add_argument("--out", required=True, type=Path)
     sim_sign.set_defaults(func=_sim_sign_event_id)
 
+    sim_exchange = subparsers.add_parser("sim-exchange-apdu", help="Run one raw APDU command against the simulator")
+    sim_exchange.add_argument("--secret-key", required=True, type=_secret_key)
+    sim_exchange.add_argument("--command-hex", required=True, type=_command_hex)
+    sim_exchange.add_argument("--out", required=True, type=Path)
+    sim_exchange.set_defaults(func=_sim_exchange_apdu)
+
     pcsc_public_key = subparsers.add_parser("pcsc-get-public-key", help="Run GET_PUBLIC_KEY against the first PC/SC reader")
     pcsc_public_key.add_argument("--out", required=True, type=Path)
     pcsc_public_key.set_defaults(func=_pcsc_get_public_key)
@@ -150,6 +190,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     pcsc_sign.add_argument("--out", required=True, type=Path)
     pcsc_sign.set_defaults(func=_pcsc_sign_event_id)
+
+    pcsc_exchange = subparsers.add_parser("pcsc-exchange-apdu", help="Run one raw APDU command against the first PC/SC reader")
+    pcsc_exchange.add_argument("--command-hex", required=True, type=_command_hex)
+    pcsc_exchange.add_argument("--out", required=True, type=Path)
+    pcsc_exchange.set_defaults(func=_pcsc_exchange_apdu)
 
     return parser
 

@@ -310,6 +310,70 @@ class SmartcardCliTests(unittest.TestCase):
             self.assertEqual(output["status_word"], GET_PUBLIC_KEY_VECTOR["status_word"])
             self.assertEqual(output["public_key"], GET_PUBLIC_KEY_VECTOR["response_data_hex"])
 
+    def test_cli_sim_exchange_apdu_matches_shared_fixed_response_vectors(self) -> None:
+        fixed_response_vectors = [
+            vector
+            for vector in SMARTCARD_APDU_VECTORS.values()
+            if "command_hex" in vector and "response_hex" in vector
+        ]
+        self.assertGreaterEqual(len(fixed_response_vectors), 7)
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            for vector in fixed_response_vectors:
+                with self.subTest(name=vector["name"]):
+                    output_path = Path(temp_root) / f"{vector['name']}.json"
+
+                    subprocess.run(
+                        [
+                            sys.executable,
+                            "-m",
+                            "nsealr_smartcard",
+                            "sim-exchange-apdu",
+                            "--secret-key",
+                            KEY["secret_key"],
+                            "--command-hex",
+                            vector["command_hex"],
+                            "--out",
+                            str(output_path),
+                        ],
+                        cwd=ROOT,
+                        check=True,
+                    )
+
+                    output = json.loads(output_path.read_text(encoding="utf-8"))
+                    expected_status = vector.get("expected_status_word", vector.get("status_word"))
+                    self.assertEqual(output["transport"], "simulator")
+                    self.assertEqual(output["command_hex"], vector["command_hex"])
+                    self.assertEqual(output["response_hex"], vector["response_hex"])
+                    self.assertEqual(output["status_word"], expected_status)
+
+    def test_cli_sim_exchange_apdu_rejects_malformed_command_hex_without_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "apdu.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "nsealr_smartcard",
+                    "sim-exchange-apdu",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--command-hex",
+                    "8010000",
+                    "--out",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("command hex must be even-length lowercase hex", result.stderr)
+            self.assertFalse(output_path.exists())
+
     def test_cli_sim_sign_event_id_writes_apdu_report(self) -> None:
         with tempfile.TemporaryDirectory() as temp_root:
             output_path = Path(temp_root) / "signature.json"
@@ -423,6 +487,29 @@ class SmartcardCliTests(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertIn("pyscard is required for PC/SC transport", stderr.getvalue())
             self.assertFalse(output_path.exists())
+
+    def test_cli_pcsc_exchange_apdu_writes_raw_apdu_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "pcsc-apdu.json"
+            transport = PcscTransport.from_first_reader(lambda: [
+                FakePcscReader(FakePcscConnection(([], 0x6A, 0x86)))
+            ])
+
+            with patch("nsealr_smartcard.cli.PcscTransport.from_first_reader", return_value=transport):
+                result = smartcard_cli.main([
+                    "pcsc-exchange-apdu",
+                    "--command-hex",
+                    SMARTCARD_APDU_VECTORS["get-public-key-nonzero-p1"]["command_hex"],
+                    "--out",
+                    str(output_path),
+                ])
+
+            self.assertEqual(result, 0)
+            output = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(output["transport"], "pcsc")
+            self.assertEqual(output["command_hex"], SMARTCARD_APDU_VECTORS["get-public-key-nonzero-p1"]["command_hex"])
+            self.assertEqual(output["response_hex"], SMARTCARD_APDU_VECTORS["get-public-key-nonzero-p1"]["response_hex"])
+            self.assertEqual(output["status_word"], SMARTCARD_APDU_VECTORS["get-public-key-nonzero-p1"]["expected_status_word"])
 
 
 class ProjectToolingTests(unittest.TestCase):

@@ -28,12 +28,14 @@ technical references. License boundaries must be respected before any code reuse
   `pyscard`, reader enumeration, readers, reader connections, or APDU exchange
   are unavailable.
 - `nsealr_smartcard.cli`: simulator and PC/SC probe commands for
-  `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`. Simulator commands are deterministic
-  development tools; PC/SC commands are probe tooling and do not establish
-  real-card compatibility by themselves. `SIGN_EVENT_ID` report commands are
-  gated by explicit external review acknowledgement and a 32-byte
+  `GET_PUBLIC_KEY`, `SIGN_EVENT_ID`, and raw APDU exchange. Simulator commands
+  are deterministic development tools; PC/SC commands are probe tooling and do
+  not establish real-card compatibility by themselves. `SIGN_EVENT_ID` report
+  commands are gated by explicit external review acknowledgement and a 32-byte
   `approval_digest` so display-less signing reports cannot be produced as if
-  the card had reviewed the full event.
+  the card had reviewed the full event. Raw APDU exchange commands are narrow
+  fixture and capture probes; they report command bytes, response bytes, and
+  status words without adding any event-review or real-card trust claim.
 
 The first command boundary is deliberately small:
 
@@ -77,7 +79,8 @@ display-less card autonomous scoped policy automation in v0.
 
 Tests consume APDU vectors from `nSealr/specs` so command bytes, response
 expectations, and deterministic rejection status words remain shared across
-implementations.
+implementations. The raw APDU simulator command exists so those shared fixed
+response vectors can be replayed directly by single-repo and cross-repo checks.
 
 Feature target and current status live in `nSealr/specs`
 `vectors/features/signer-feature-matrix-v0.json`. The smartcard repository
