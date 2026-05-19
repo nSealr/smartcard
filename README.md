@@ -38,11 +38,14 @@ repository host a forked or custom JavaCard applet.
   `SIGN_EVENT_ID` report commands require explicit
   `--review-acknowledged` and `--approval-digest` flags because the smartcard
   cannot review full event JSON on its own display.
-- Identity/policy integration is deliberately not claimed yet: the shared
-  `nsealr-account-descriptor-v0` smartcard route descriptor is pending until
-  card slot, PIN, provisioning, export, and backup behavior are source-backed.
-  Any future smartcard route must require external review acknowledgement and
-  `approval_digest` binding because the card is display-less.
+- Identity/policy integration is deliberately narrow: the shared
+  `nsealr-account-descriptor-v0` fixture `smartcard-slot-0` now pins a
+  display-less, manual-only route bound to
+  `policy-manual-only-displayless-smartcard`. Production real-card support is
+  still blocked on card slot, PIN, provisioning, export, backup, and real-card
+  APDU behavior. The smartcard route must require external review
+  acknowledgement and `approval_digest` binding because the card is
+  display-less.
   If multiple card slots are supported, each slot public key is its own account
   and policy subject. The card must not be presented as a trusted policy or
   event-review surface by itself.

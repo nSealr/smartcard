@@ -60,12 +60,13 @@ require `--review-acknowledged` and `--approval-digest`. The APDU remains a
 allows a human-facing signature artifact without an explicit external review
 acknowledgement.
 
-Status note, 2026-05-11: identity/policy integration remains intentionally
-blocked. The `nsealr-account-descriptor-v0` smartcard route descriptor is
-pending until card slot, PIN, provisioning, export, backup, and real-card APDU
-behavior are source-backed. Any future descriptor must keep the card
-display-less, require external review acknowledgement, and bind the signed
-event id to an `approval_digest` before companion publication.
+Status note, 2026-05-19: `nSealr/specs` now publishes the
+`smartcard-slot-0` account descriptor and
+`policy-manual-only-displayless-smartcard` policy profile. This only freezes
+the route contract: display-less, manual-only, external-review acknowledged,
+`approval_digest` bound, and no persistent grant automation. Production
+real-card support remains blocked until card slot, PIN, provisioning, export,
+backup, and real-card APDU behavior are source-backed.
 
 ## Later
 

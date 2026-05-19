@@ -35,10 +35,10 @@ flag; newer pip versions already build in place and leave the flag disabled.
   unavailable-provider/no-reader/connection setup and APDU exchange errors.
 - PC/SC malformed-response tests for malformed transmit-result shape, missing
   data, and non-integer or out-of-range data and status bytes.
-- Documentation boundary tests requiring the pending
-  `nsealr-account-descriptor-v0` smartcard route descriptor to stay display-less,
-  externally reviewed, and `approval_digest` bound before any production
-  identity/policy claim.
+- Documentation and fixture boundary tests requiring the shared
+  `smartcard-slot-0` account descriptor to stay display-less, manual-only,
+  externally reviewed, `approval_digest` bound, and free of persistent grant
+  automation before any production identity/policy claim.
 - Single-repo CI falls back to fixture snapshots under `tests/fixtures/specs`
   when the sibling `nSealr/specs` checkout is not present. Cross-repo drift
   is still guarded by `nSealr/lab` integration checks.

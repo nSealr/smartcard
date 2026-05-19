@@ -46,10 +46,16 @@ review the event before sending the digest to the card.
 
 ## Identity And Policy Boundary
 
-The shared `nsealr-account-descriptor-v0` smartcard route descriptor is pending.
-It must not be added until real card slot behavior, PIN/PUK policy,
-provisioning, export policy, and backup/recovery semantics are verified from
-sources or hardware captures.
+The shared `nsealr-account-descriptor-v0` fixture `smartcard-slot-0` pins the
+v0 route shape: repository `smartcard`, transport `smartcard`, custody
+`card_persistent`, trusted review `display_less`, policy support
+`manual_only`, and `persistent_grants: false`. It is bound to
+`policy-manual-only-displayless-smartcard`.
+
+This fixture is a route contract, not a production real-card claim. Production
+support remains blocked until real card slot behavior, PIN/PUK policy,
+provisioning, export policy, backup/recovery semantics, and real-card APDU
+behavior are verified from sources or hardware captures.
 
 The eventual route can protect a key inside a display-less card, but it must
 not claim trusted event review. It must require external review

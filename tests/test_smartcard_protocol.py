@@ -39,6 +39,12 @@ SMARTCARD_APDU_VECTORS = {
     path.stem: json.loads(path.read_text(encoding="utf-8"))
     for path in sorted((SPECS / "vectors/smartcard").glob("*.json"))
 }
+SMARTCARD_ACCOUNT = json.loads(
+    (SPECS / "vectors/accounts/smartcard-slot-0.json").read_text(encoding="utf-8")
+)
+SMARTCARD_POLICY = json.loads(
+    (SPECS / "vectors/policies/manual-only-displayless-smartcard.json").read_text(encoding="utf-8")
+)
 
 
 class FakePcscConnection:
@@ -65,6 +71,17 @@ class FakePcscReader:
 
 class SmartcardProtocolTests(unittest.TestCase):
     def test_docs_keep_smartcard_identity_policy_boundary_displayless(self) -> None:
+        self.assertEqual(SMARTCARD_ACCOUNT["signer_route"]["type"], "smartcard")
+        self.assertEqual(SMARTCARD_ACCOUNT["signer_route"]["custody"], "card_persistent")
+        self.assertEqual(SMARTCARD_ACCOUNT["signer_route"]["trusted_review"], "display_less")
+        self.assertEqual(SMARTCARD_ACCOUNT["signer_route"]["policy_support"], "manual_only")
+        self.assertFalse(SMARTCARD_ACCOUNT["capabilities"]["physical_review"])
+        self.assertFalse(SMARTCARD_ACCOUNT["capabilities"]["physical_approval"])
+        self.assertFalse(SMARTCARD_ACCOUNT["capabilities"]["persistent_grants"])
+        self.assertEqual(SMARTCARD_POLICY["policy_id"], SMARTCARD_ACCOUNT["policy_profile_id"])
+        self.assertEqual(SMARTCARD_POLICY["mode"], "manual_only")
+        self.assertFalse(SMARTCARD_POLICY["grants_allowed"])
+
         docs = "\n".join(
             [
                 (ROOT / "README.md").read_text(encoding="utf-8"),
@@ -75,10 +92,12 @@ class SmartcardProtocolTests(unittest.TestCase):
         )
 
         self.assertIn("nsealr-account-descriptor-v0", docs)
-        self.assertIn("smartcard route descriptor is pending", docs)
+        self.assertIn("smartcard-slot-0", docs)
+        self.assertIn("policy-manual-only-displayless-smartcard", docs)
         self.assertIn("external review acknowledgement", docs)
         self.assertIn("approval_digest", docs)
         self.assertIn("display-less", docs)
+        self.assertIn("manual-only", docs)
         self.assertIn("cannot provide trusted event review by itself", docs.replace("\n", " "))
         self.assertNotIn("provides trusted event review by itself", docs.lower())
 
