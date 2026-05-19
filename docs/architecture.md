@@ -50,7 +50,10 @@ The shared `nsealr-account-descriptor-v0` fixture `smartcard-slot-0` pins the
 v0 route shape: repository `smartcard`, transport `smartcard`, custody
 `card_persistent`, trusted review `display_less`, policy support
 `manual_only`, and `persistent_grants: false`. It is bound to
-`policy-manual-only-displayless-smartcard`.
+`policy-manual-only-displayless-smartcard`. The shared
+`smartcard-sign-event-slot-0` route-selection vector pins the matching
+request-routing metadata and keeps the route display-less, externally
+reviewed, manual-only, non-granting, and secretless at the descriptor layer.
 
 This fixture is a route contract, not a production real-card claim. Production
 support remains blocked until real card slot behavior, PIN/PUK policy,

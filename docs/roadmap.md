@@ -68,6 +68,11 @@ the route contract: display-less, manual-only, external-review acknowledged,
 real-card support remains blocked until card slot, PIN, provisioning, export,
 backup, and real-card APDU behavior are source-backed.
 
+Status note, 2026-05-19: the smartcard tests now also consume
+`smartcard-sign-event-slot-0`. The checked selection remains display-less,
+external-review dependent, manual-only, `card_persistent`,
+`persistent_grants: false`, and `contains_secret_material: false`.
+
 ## Later
 
 - Native audited adapter.

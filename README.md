@@ -41,9 +41,10 @@ repository host a forked or custom JavaCard applet.
 - Identity/policy integration is deliberately narrow: the shared
   `nsealr-account-descriptor-v0` fixture `smartcard-slot-0` now pins a
   display-less, manual-only route bound to
-  `policy-manual-only-displayless-smartcard`. Production real-card support is
-  still blocked on card slot, PIN, provisioning, export, backup, and real-card
-  APDU behavior. The smartcard route must require external review
+  `policy-manual-only-displayless-smartcard`, with request routing pinned by
+  `smartcard-sign-event-slot-0`. Production real-card support is still blocked
+  on card slot, PIN, provisioning, export, backup, and real-card APDU
+  behavior. The smartcard route must require external review
   acknowledgement and `approval_digest` binding because the card is
   display-less.
   If multiple card slots are supported, each slot public key is its own account

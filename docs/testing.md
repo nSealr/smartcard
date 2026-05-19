@@ -38,7 +38,9 @@ flag; newer pip versions already build in place and leave the flag disabled.
 - Documentation and fixture boundary tests requiring the shared
   `smartcard-slot-0` account descriptor to stay display-less, manual-only,
   externally reviewed, `approval_digest` bound, and free of persistent grant
-  automation before any production identity/policy claim.
+  automation before any production identity/policy claim. The same test
+  consumes `smartcard-sign-event-slot-0` so route-selection metadata cannot
+  drift from the account descriptor.
 - Single-repo CI falls back to fixture snapshots under `tests/fixtures/specs`
   when the sibling `nSealr/specs` checkout is not present. Cross-repo drift
   is still guarded by `nSealr/lab` integration checks.
