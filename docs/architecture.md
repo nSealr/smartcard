@@ -30,7 +30,10 @@ technical references. License boundaries must be respected before any code reuse
 - `nsealr_smartcard.cli`: simulator and PC/SC probe commands for
   `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`. Simulator commands are deterministic
   development tools; PC/SC commands are probe tooling and do not establish
-  real-card compatibility by themselves.
+  real-card compatibility by themselves. `SIGN_EVENT_ID` report commands are
+  gated by explicit external review acknowledgement and a 32-byte
+  `approval_digest` so display-less signing reports cannot be produced as if
+  the card had reviewed the full event.
 
 The first command boundary is deliberately small:
 

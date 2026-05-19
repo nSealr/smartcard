@@ -34,6 +34,7 @@ KEY = json.loads((SPECS / "vectors/keys/test-key-1.json").read_text(encoding="ut
 BASIC_VECTOR = json.loads((SPECS / "vectors/events/kind-1-basic.json").read_text(encoding="utf-8"))
 GET_PUBLIC_KEY_VECTOR = json.loads((SPECS / "vectors/smartcard/get-public-key.json").read_text(encoding="utf-8"))
 SIGN_EVENT_ID_VECTOR = json.loads((SPECS / "vectors/smartcard/sign-event-id-kind-1-basic.json").read_text(encoding="utf-8"))
+APPROVAL_DIGEST = "a09ddd564e439fdd4756da6863156eddcfc50c295af453af1c78c35986c303a5"
 SMARTCARD_APDU_VECTORS = {
     path.stem: json.loads(path.read_text(encoding="utf-8"))
     for path in sorted((SPECS / "vectors/smartcard").glob("*.json"))
@@ -284,6 +285,9 @@ class SmartcardCliTests(unittest.TestCase):
                     KEY["secret_key"],
                     "--event-id",
                     SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--review-acknowledged",
+                    "--approval-digest",
+                    APPROVAL_DIGEST,
                     "--out",
                     str(output_path),
                 ],
@@ -296,6 +300,9 @@ class SmartcardCliTests(unittest.TestCase):
             self.assertEqual(output["command_hex"], SIGN_EVENT_ID_VECTOR["command_hex"])
             self.assertEqual(output["status_word"], SIGN_EVENT_ID_VECTOR["expected_status_word"])
             self.assertEqual(output["event_id"], SIGN_EVENT_ID_VECTOR["event_id"])
+            self.assertEqual(output["trusted_review"], "external")
+            self.assertTrue(output["review_acknowledged"])
+            self.assertEqual(output["approval_digest"], APPROVAL_DIGEST)
             self.assertEqual(len(output["signature"]), 128)
             self.assertTrue(
                 verify_schnorr_signature(
@@ -304,6 +311,65 @@ class SmartcardCliTests(unittest.TestCase):
                     output["signature"],
                 )
             )
+
+    def test_cli_sim_sign_event_id_requires_external_review_acknowledgement(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "signature.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "nsealr_smartcard",
+                    "sim-sign-event-id",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--event-id",
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--approval-digest",
+                    APPROVAL_DIGEST,
+                    "--out",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("--review-acknowledged", result.stderr)
+            self.assertFalse(output_path.exists())
+
+    def test_cli_sim_sign_event_id_rejects_malformed_approval_digest(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "signature.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "nsealr_smartcard",
+                    "sim-sign-event-id",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--event-id",
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--review-acknowledged",
+                    "--approval-digest",
+                    "A" * 64,
+                    "--out",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("approval digest must be 32-byte lowercase hex", result.stderr)
+            self.assertFalse(output_path.exists())
 
     def test_cli_pcsc_get_public_key_fails_cleanly_without_pcsc(self) -> None:
         with tempfile.TemporaryDirectory() as temp_root:

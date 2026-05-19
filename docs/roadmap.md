@@ -54,6 +54,12 @@ for the same APDU operations. The PC/SC path still uses the optional
 fake-tested transport boundary and fails clearly when `pyscard` or a reader is
 unavailable; this does not claim real-card compatibility.
 
+Status note, 2026-05-19: display-less `SIGN_EVENT_ID` report commands now
+require `--review-acknowledged` and `--approval-digest`. The APDU remains a
+32-byte event-id signing primitive, but the CLI report boundary no longer
+allows a human-facing signature artifact without an explicit external review
+acknowledgement.
+
 Status note, 2026-05-11: identity/policy integration remains intentionally
 blocked. The `nsealr-account-descriptor-v0` smartcard route descriptor is
 pending until card slot, PIN, provisioning, export, backup, and real-card APDU

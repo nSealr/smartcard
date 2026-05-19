@@ -25,7 +25,10 @@ flag; newer pip versions already build in place and leave the flag disabled.
   so future APDU rejection fixtures are picked up without a hand-written name
   list.
 - CLI simulator report tests for `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`, plus
-  entry-point packaging coverage for `nsealr-smartcard`.
+  entry-point packaging coverage for `nsealr-smartcard`. `SIGN_EVENT_ID`
+  report tests require `--review-acknowledged` and a valid lowercase
+  `--approval-digest`, and prove malformed or missing review acknowledgement
+  writes no output.
 - CLI PC/SC probe test proving the command fails clearly and writes no output
   when `pyscard` or a reader is unavailable.
 - PC/SC transport boundary tests with fake readers/connections and explicit

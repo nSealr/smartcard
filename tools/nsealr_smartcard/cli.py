@@ -25,6 +25,10 @@ def _event_id(value: str) -> str:
     return _hex32(value, "event id")
 
 
+def _approval_digest(value: str) -> str:
+    return _hex32(value, "approval digest")
+
+
 def _write_json(path: Path, value: dict[str, object]) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
@@ -58,6 +62,7 @@ def _signature_report(
     command: CommandAPDU,
     response: ResponseAPDU,
     event_id: str,
+    approval_digest: str,
 ) -> dict[str, object]:
     report: dict[str, object] = {
         "transport": transport,
@@ -65,6 +70,9 @@ def _signature_report(
         "response_hex": response.to_bytes().hex(),
         "status_word": _status_word(response),
         "event_id": event_id,
+        "trusted_review": "external",
+        "review_acknowledged": True,
+        "approval_digest": approval_digest,
     }
     if response.status_word == SW_NO_ERROR:
         report["signature"] = response.data.hex()
@@ -80,7 +88,7 @@ def _sim_get_public_key(args: argparse.Namespace) -> None:
 def _sim_sign_event_id(args: argparse.Namespace) -> None:
     command = _sign_event_id_command(args.event_id)
     response = SmartcardSimulator(args.secret_key).exchange(command)
-    _write_json(args.out, _signature_report("simulator", command, response, args.event_id))
+    _write_json(args.out, _signature_report("simulator", command, response, args.event_id, args.approval_digest))
 
 
 def _pcsc_get_public_key(args: argparse.Namespace) -> None:
@@ -92,7 +100,7 @@ def _pcsc_get_public_key(args: argparse.Namespace) -> None:
 def _pcsc_sign_event_id(args: argparse.Namespace) -> None:
     command = _sign_event_id_command(args.event_id)
     response = PcscTransport.from_first_reader().exchange(command)
-    _write_json(args.out, _signature_report("pcsc", command, response, args.event_id))
+    _write_json(args.out, _signature_report("pcsc", command, response, args.event_id, args.approval_digest))
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -107,6 +115,18 @@ def build_parser() -> argparse.ArgumentParser:
     sim_sign = subparsers.add_parser("sim-sign-event-id", help="Run SIGN_EVENT_ID against the simulator")
     sim_sign.add_argument("--secret-key", required=True, type=_secret_key)
     sim_sign.add_argument("--event-id", required=True, type=_event_id)
+    sim_sign.add_argument(
+        "--review-acknowledged",
+        action="store_true",
+        required=True,
+        help="Confirm the event id was produced after external trusted review",
+    )
+    sim_sign.add_argument(
+        "--approval-digest",
+        required=True,
+        type=_approval_digest,
+        help="32-byte lowercase hex digest that binds the external review acknowledgement",
+    )
     sim_sign.add_argument("--out", required=True, type=Path)
     sim_sign.set_defaults(func=_sim_sign_event_id)
 
@@ -116,6 +136,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     pcsc_sign = subparsers.add_parser("pcsc-sign-event-id", help="Run SIGN_EVENT_ID against the first PC/SC reader")
     pcsc_sign.add_argument("--event-id", required=True, type=_event_id)
+    pcsc_sign.add_argument(
+        "--review-acknowledged",
+        action="store_true",
+        required=True,
+        help="Confirm the event id was produced after external trusted review",
+    )
+    pcsc_sign.add_argument(
+        "--approval-digest",
+        required=True,
+        type=_approval_digest,
+        help="32-byte lowercase hex digest that binds the external review acknowledgement",
+    )
     pcsc_sign.add_argument("--out", required=True, type=Path)
     pcsc_sign.set_defaults(func=_pcsc_sign_event_id)
 

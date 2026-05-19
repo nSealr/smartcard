@@ -35,6 +35,9 @@ repository host a forked or custom JavaCard applet.
   `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` reports plus future PC/SC
   `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` probes. PC/SC commands fail clearly when
   `pyscard` or a reader is unavailable and do not claim real-card support.
+  `SIGN_EVENT_ID` report commands require explicit
+  `--review-acknowledged` and `--approval-digest` flags because the smartcard
+  cannot review full event JSON on its own display.
 - Identity/policy integration is deliberately not claimed yet: the shared
   `nsealr-account-descriptor-v0` smartcard route descriptor is pending until
   card slot, PIN, provisioning, export, and backup behavior are source-backed.
