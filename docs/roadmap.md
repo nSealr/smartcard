@@ -48,6 +48,11 @@ Status note, 2026-05-11: APDU rejection-vector tests now discover every shared
 smartcard vector with an `expected_status_word` and fixed `response_hex`
 instead of naming individual rejection files.
 
+Status note, 2026-05-19: shared APDU vectors now also reject non-zero P1/P2 and
+explicit Le bytes for `GET_PUBLIC_KEY` and `SIGN_EVENT_ID`. The simulator
+returns `0x6A86` for P1/P2 profile mismatches and `0x6700` for unsupported Le
+or length mismatches before any signing operation.
+
 Status note, 2026-05-10: `nsealr-smartcard` now exposes simulator
 `GET_PUBLIC_KEY` and `SIGN_EVENT_ID` report commands plus PC/SC probe commands
 for the same APDU operations. The PC/SC path still uses the optional

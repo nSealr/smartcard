@@ -10,6 +10,7 @@ from .protocol import (
     INS_SIGN_EVENT_ID,
     NSEALR_CLA,
     SW_CLA_NOT_SUPPORTED,
+    SW_INCORRECT_P1P2,
     SW_INS_NOT_SUPPORTED,
     SW_NO_ERROR,
     SW_WRONG_LENGTH,
@@ -68,11 +69,15 @@ class SmartcardSimulator:
         if command.cla != NSEALR_CLA:
             return ResponseAPDU(status_word=SW_CLA_NOT_SUPPORTED)
         if command.ins == INS_GET_PUBLIC_KEY:
-            if command.data:
+            if command.p1 != 0 or command.p2 != 0:
+                return ResponseAPDU(status_word=SW_INCORRECT_P1P2)
+            if command.data or command.le is not None:
                 return ResponseAPDU(status_word=SW_WRONG_LENGTH)
             return ResponseAPDU(xonly_pubkey_from_secret(self._secret_key_hex), SW_NO_ERROR)
         if command.ins == INS_SIGN_EVENT_ID:
-            if len(command.data) != 32:
+            if command.p1 != 0 or command.p2 != 0:
+                return ResponseAPDU(status_word=SW_INCORRECT_P1P2)
+            if len(command.data) != 32 or command.le is not None:
                 return ResponseAPDU(status_word=SW_WRONG_LENGTH)
             signature = self._private_key.schnorr_sign(command.data, "", raw=True)
             return ResponseAPDU(signature, SW_NO_ERROR)

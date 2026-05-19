@@ -19,8 +19,9 @@ flag; newer pip versions already build in place and leave the flag disabled.
 - `SIGN_EVENT_ID` simulator response with Schnorr verification against shared
   `nSealr/specs` fixtures.
 - Shared `nSealr/specs` APDU vector conformance tests, including
-  deterministic wrong-length, unsupported-CLA, and unsupported-INS status-word
-  responses. Rejection-vector discovery is directory-driven for every
+  deterministic wrong-length, non-zero P1/P2, unsupported Le, unsupported-CLA,
+  and unsupported-INS status-word responses. Rejection-vector discovery is
+  directory-driven for every
   smartcard vector that carries both `expected_status_word` and `response_hex`,
   so future APDU rejection fixtures are picked up without a hand-written name
   list.

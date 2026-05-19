@@ -40,6 +40,10 @@ The first command boundary is deliberately small:
 - `GET_PUBLIC_KEY`: returns the active x-only secp256k1 public key.
 - `SIGN_EVENT_ID`: signs exactly one 32-byte Nostr event id.
 
+Both commands use exact short APDUs in v0: proprietary CLA `0x80`, P1/P2 set
+to `0x00`, and no Le byte. Non-zero P1/P2 values return `0x6A86`; unexpected
+Le or wrong payload length returns `0x6700`.
+
 This mirrors what display-less smartcards can realistically do without a trusted
 screen. The companion or another trusted review device must still compute and
 review the event before sending the digest to the card.
