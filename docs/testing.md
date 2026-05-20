@@ -34,6 +34,10 @@ flag; newer pip versions already build in place and leave the flag disabled.
   report tests require `--review-acknowledged` and a valid lowercase
   `--approval-digest`, and prove malformed or missing review acknowledgement
   writes no output.
+- CLI output-path safety tests proving existing report paths are rejected
+  without overwriting their contents and before simulator exchange or PC/SC
+  reader lookup. Missing parent directories are rejected before simulator
+  exchange, and successful report writes use exclusive-create semantics.
 - CLI PC/SC probe test proving the command fails clearly and writes no output
   when `pyscard` or a reader is unavailable.
 - CLI PC/SC raw APDU report test with a fake reader, proving the command writes

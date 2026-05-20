@@ -330,6 +330,49 @@ class SmartcardCliTests(unittest.TestCase):
             self.assertEqual(output["status_word"], GET_PUBLIC_KEY_VECTOR["status_word"])
             self.assertEqual(output["public_key"], GET_PUBLIC_KEY_VECTOR["response_data_hex"])
 
+    def test_cli_rejects_existing_output_before_simulator_exchange(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "public-key.json"
+            output_path.write_text("existing\n", encoding="utf-8")
+
+            with patch("nsealr_smartcard.cli.SmartcardSimulator") as simulator_class, patch(
+                "sys.stderr",
+                new_callable=io.StringIO,
+            ) as stderr:
+                result = smartcard_cli.main([
+                    "sim-get-public-key",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--out",
+                    str(output_path),
+                ])
+
+            self.assertEqual(result, 1)
+            self.assertIn("output path already exists", stderr.getvalue())
+            self.assertEqual(output_path.read_text(encoding="utf-8"), "existing\n")
+            simulator_class.assert_not_called()
+
+    def test_cli_rejects_missing_output_parent_before_simulator_exchange(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "missing" / "public-key.json"
+
+            with patch("nsealr_smartcard.cli.SmartcardSimulator") as simulator_class, patch(
+                "sys.stderr",
+                new_callable=io.StringIO,
+            ) as stderr:
+                result = smartcard_cli.main([
+                    "sim-get-public-key",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--out",
+                    str(output_path),
+                ])
+
+            self.assertEqual(result, 1)
+            self.assertIn("output parent directory does not exist", stderr.getvalue())
+            self.assertFalse(output_path.exists())
+            simulator_class.assert_not_called()
+
     def test_cli_sim_exchange_apdu_matches_shared_fixed_response_vectors(self) -> None:
         fixed_response_vectors = [
             vector
@@ -507,6 +550,22 @@ class SmartcardCliTests(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertIn("pyscard is required for PC/SC transport", stderr.getvalue())
             self.assertFalse(output_path.exists())
+
+    def test_cli_rejects_existing_output_before_pcsc_reader_lookup(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "public-key.json"
+            output_path.write_text("existing\n", encoding="utf-8")
+
+            with patch("nsealr_smartcard.cli.PcscTransport.from_first_reader") as from_first_reader, patch(
+                "sys.stderr",
+                new_callable=io.StringIO,
+            ) as stderr:
+                result = smartcard_cli.main(["pcsc-get-public-key", "--out", str(output_path)])
+
+            self.assertEqual(result, 1)
+            self.assertIn("output path already exists", stderr.getvalue())
+            self.assertEqual(output_path.read_text(encoding="utf-8"), "existing\n")
+            from_first_reader.assert_not_called()
 
     def test_cli_pcsc_exchange_apdu_writes_raw_apdu_report(self) -> None:
         with tempfile.TemporaryDirectory() as temp_root:

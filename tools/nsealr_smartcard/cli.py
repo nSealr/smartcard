@@ -35,8 +35,27 @@ def _command_hex(value: str) -> str:
     return value
 
 
+def _prepare_output_path(path: Path) -> None:
+    if path.exists():
+        raise ValueError(f"output path already exists: {path}")
+    parent = path.parent
+    if not parent.exists():
+        raise ValueError(f"output parent directory does not exist: {parent}")
+    if not parent.is_dir():
+        raise ValueError(f"output parent path is not a directory: {parent}")
+
+
 def _write_json(path: Path, value: dict[str, object]) -> None:
-    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    payload = json.dumps(value, indent=2, sort_keys=True) + "\n"
+    try:
+        with path.open("x", encoding="utf-8") as output:
+            output.write(payload)
+    except FileExistsError:
+        raise ValueError(f"output path already exists: {path}") from None
+    except FileNotFoundError:
+        raise ValueError(f"output parent directory does not exist: {path.parent}") from None
+    except IsADirectoryError:
+        raise ValueError(f"output path is a directory: {path}") from None
 
 
 def _status_word(response: ResponseAPDU) -> str:
@@ -102,36 +121,42 @@ def _signature_report(
 
 
 def _sim_get_public_key(args: argparse.Namespace) -> None:
+    _prepare_output_path(args.out)
     command = _get_public_key_command()
     response = SmartcardSimulator(args.secret_key).exchange(command)
     _write_json(args.out, _public_key_report("simulator", command, response))
 
 
 def _sim_sign_event_id(args: argparse.Namespace) -> None:
+    _prepare_output_path(args.out)
     command = _sign_event_id_command(args.event_id)
     response = SmartcardSimulator(args.secret_key).exchange(command)
     _write_json(args.out, _signature_report("simulator", command, response, args.event_id, args.approval_digest))
 
 
 def _sim_exchange_apdu(args: argparse.Namespace) -> None:
+    _prepare_output_path(args.out)
     command = _command_from_hex(args.command_hex)
     response = SmartcardSimulator(args.secret_key).exchange(command)
     _write_json(args.out, _apdu_exchange_report("simulator", command, response))
 
 
 def _pcsc_get_public_key(args: argparse.Namespace) -> None:
+    _prepare_output_path(args.out)
     command = _get_public_key_command()
     response = PcscTransport.from_first_reader().exchange(command)
     _write_json(args.out, _public_key_report("pcsc", command, response))
 
 
 def _pcsc_sign_event_id(args: argparse.Namespace) -> None:
+    _prepare_output_path(args.out)
     command = _sign_event_id_command(args.event_id)
     response = PcscTransport.from_first_reader().exchange(command)
     _write_json(args.out, _signature_report("pcsc", command, response, args.event_id, args.approval_digest))
 
 
 def _pcsc_exchange_apdu(args: argparse.Namespace) -> None:
+    _prepare_output_path(args.out)
     command = _command_from_hex(args.command_hex)
     response = PcscTransport.from_first_reader().exchange(command)
     _write_json(args.out, _apdu_exchange_report("pcsc", command, response))

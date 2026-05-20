@@ -37,7 +37,9 @@ repository host a forked or custom JavaCard applet.
   `GET_PUBLIC_KEY`, `SIGN_EVENT_ID`, and raw APDU exchange reports plus future
   PC/SC `GET_PUBLIC_KEY`, `SIGN_EVENT_ID`, and raw APDU probes. PC/SC commands
   fail clearly when `pyscard` or a reader is unavailable and do not claim
-  real-card support.
+  real-card support. Report commands require a new output path, reject missing
+  output parent directories, and write with exclusive-create semantics so an
+  existing capture or signing artifact is never overwritten.
   `SIGN_EVENT_ID` report commands require explicit
   `--review-acknowledged` and `--approval-digest` flags because the smartcard
   cannot review full event JSON on its own display.

@@ -65,6 +65,12 @@ replay fixed-response shared APDU vectors directly, including P1/P2 and Le
 rejections. The PC/SC path remains a probe/capture tool and is not a real-card
 compatibility claim.
 
+Status note, 2026-05-19: `nsealr-smartcard` report commands now require a new
+output file before any simulator or PC/SC exchange. Existing output paths and
+missing parent directories fail before exchange, and successful reports are
+written with exclusive-create semantics so APDU captures and signature reports
+cannot be overwritten accidentally.
+
 Status note, 2026-05-19: display-less `SIGN_EVENT_ID` report commands now
 require `--review-acknowledged` and `--approval-digest`. The APDU remains a
 32-byte event-id signing primitive, but the CLI report boundary no longer

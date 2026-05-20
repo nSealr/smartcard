@@ -32,12 +32,17 @@ technical references. License boundaries must be respected before any code reuse
 - `nsealr_smartcard.cli`: simulator and PC/SC probe commands for
   `GET_PUBLIC_KEY`, `SIGN_EVENT_ID`, and raw APDU exchange. Simulator commands
   are deterministic development tools; PC/SC commands are probe tooling and do
-  not establish real-card compatibility by themselves. `SIGN_EVENT_ID` report
-  commands are gated by explicit external review acknowledgement and a 32-byte
-  `approval_digest` so display-less signing reports cannot be produced as if
-  the card had reviewed the full event. Raw APDU exchange commands are narrow
-  fixture and capture probes; they report command bytes, response bytes, and
-  status words without adding any event-review or real-card trust claim.
+  not establish real-card compatibility by themselves. Every report command
+  validates that the output parent exists and the output file does not already
+  exist before simulator or PC/SC exchange, then writes with exclusive-create
+  semantics. This keeps capture artifacts append-only by workflow convention
+  and prevents an unavailable or malformed output path from triggering a card
+  exchange first. `SIGN_EVENT_ID` report commands are gated by explicit
+  external review acknowledgement and a 32-byte `approval_digest` so
+  display-less signing reports cannot be produced as if the card had reviewed
+  the full event. Raw APDU exchange commands are narrow fixture and capture
+  probes; they report command bytes, response bytes, and status words without
+  adding any event-review or real-card trust claim.
 
 The first command boundary is deliberately small:
 
