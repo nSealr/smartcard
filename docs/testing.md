@@ -14,7 +14,9 @@ flag; newer pip versions already build in place and leave the flag disabled.
 ## Implemented Tests
 
 - Short APDU command encode/decode round trip.
-- Short APDU oversized payload rejection.
+- Short APDU deterministic rejection for oversized payloads, non-integer byte
+  fields, boolean byte fields, non-byte command payloads, non-integer status
+  words, and non-byte response payloads.
 - `GET_PUBLIC_KEY` simulator response.
 - `SIGN_EVENT_ID` simulator response with Schnorr verification against shared
   `nSealr/specs` fixtures.

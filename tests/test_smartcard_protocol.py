@@ -133,6 +133,26 @@ class SmartcardProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "short APDU data cannot exceed 255 bytes"):
             CommandAPDU(NSEALR_CLA, INS_SIGN_EVENT_ID, 0x00, 0x00, bytes(256)).to_bytes()
 
+    def test_short_apdu_rejects_non_integer_header_bytes(self) -> None:
+        with self.assertRaisesRegex(ValueError, "cla must be an integer byte"):
+            CommandAPDU(0.5, INS_SIGN_EVENT_ID).to_bytes()  # type: ignore[arg-type]
+
+    def test_short_apdu_rejects_bool_header_bytes(self) -> None:
+        with self.assertRaisesRegex(ValueError, "cla must be an integer byte"):
+            CommandAPDU(True, INS_SIGN_EVENT_ID).to_bytes()  # type: ignore[arg-type]
+
+    def test_short_apdu_rejects_non_bytes_payloads(self) -> None:
+        with self.assertRaisesRegex(ValueError, "command APDU data must be bytes"):
+            CommandAPDU(NSEALR_CLA, INS_SIGN_EVENT_ID, data=[0x00]).to_bytes()  # type: ignore[arg-type]
+
+    def test_response_apdu_rejects_non_integer_status_words(self) -> None:
+        with self.assertRaisesRegex(ValueError, "status word must be an integer word"):
+            ResponseAPDU(status_word=True).to_bytes()  # type: ignore[arg-type]
+
+    def test_response_apdu_rejects_non_bytes_payloads(self) -> None:
+        with self.assertRaisesRegex(ValueError, "response APDU data must be bytes"):
+            ResponseAPDU(data=[0x00]).to_bytes()  # type: ignore[arg-type]
+
     def test_get_public_key_apdu(self) -> None:
         simulator = SmartcardSimulator(KEY["secret_key"])
         command = CommandAPDU.from_bytes(bytes.fromhex(GET_PUBLIC_KEY_VECTOR["command_hex"]))

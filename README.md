@@ -17,7 +17,9 @@ repository host a forked or custom JavaCard applet.
 
 ## Current Capabilities
 
-- Python APDU codec for short command and response APDUs.
+- Python APDU codec for short command and response APDUs. It rejects
+  non-integer header/status values, boolean byte values, non-byte payloads, and
+  oversized short-APDU payloads before transport.
 - nSealr proprietary APDU constants for `GET_PUBLIC_KEY` and
   `SIGN_EVENT_ID`.
 - secp256k1-backed simulator that returns x-only public keys and signs 32-byte

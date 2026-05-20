@@ -17,7 +17,9 @@ technical references. License boundaries must be respected before any code reuse
 
 ## Implemented Foundation
 
-- `nsealr_smartcard.apdu`: short APDU command/response encoding.
+- `nsealr_smartcard.apdu`: short APDU command/response encoding with
+  deterministic byte, status-word, payload-type, and short-payload length
+  validation before any transport receives command bytes.
 - `nsealr_smartcard.protocol`: nSealr CLA/INS/status-word constants.
 - `nsealr_smartcard.simulator`: secp256k1-backed local simulator.
 - `nsealr_smartcard.pcsc`: optional PC/SC transport boundary. It imports
