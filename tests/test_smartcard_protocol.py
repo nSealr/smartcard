@@ -466,10 +466,12 @@ class SmartcardCliTests(unittest.TestCase):
             self.assertEqual(output["command_hex"], SIGN_EVENT_ID_VECTOR["command_hex"])
             self.assertEqual(output["status_word"], SIGN_EVENT_ID_VECTOR["expected_status_word"])
             self.assertEqual(output["event_id"], SIGN_EVENT_ID_VECTOR["event_id"])
+            self.assertEqual(output["expected_public_key"], GET_PUBLIC_KEY_VECTOR["response_data_hex"])
             self.assertEqual(output["trusted_review"], "external")
             self.assertTrue(output["review_acknowledged"])
             self.assertEqual(output["approval_digest"], APPROVAL_DIGEST)
             self.assertEqual(len(output["signature"]), 128)
+            self.assertTrue(output["signature_verified"])
             self.assertTrue(
                 verify_schnorr_signature(
                     SIGN_EVENT_ID_VECTOR["verification_pubkey"],
@@ -477,6 +479,38 @@ class SmartcardCliTests(unittest.TestCase):
                     output["signature"],
                 )
             )
+
+    def test_cli_sim_sign_event_id_rejects_unverifiable_signature_without_output(self) -> None:
+        class BadSignatureSimulator:
+            def __init__(self, secret_key: str) -> None:
+                self.secret_key = secret_key
+
+            def exchange(self, command: CommandAPDU) -> ResponseAPDU:
+                return ResponseAPDU(bytes(64), SW_NO_ERROR)
+
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "signature.json"
+
+            with patch("nsealr_smartcard.cli.SmartcardSimulator", BadSignatureSimulator), patch(
+                "sys.stderr",
+                new_callable=io.StringIO,
+            ) as stderr:
+                result = smartcard_cli.main([
+                    "sim-sign-event-id",
+                    "--secret-key",
+                    KEY["secret_key"],
+                    "--event-id",
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--review-acknowledged",
+                    "--approval-digest",
+                    APPROVAL_DIGEST,
+                    "--out",
+                    str(output_path),
+                ])
+
+            self.assertEqual(result, 1)
+            self.assertIn("SIGN_EVENT_ID signature verification failed", stderr.getvalue())
+            self.assertFalse(output_path.exists())
 
     def test_cli_sim_sign_event_id_requires_external_review_acknowledgement(self) -> None:
         with tempfile.TemporaryDirectory() as temp_root:
@@ -566,6 +600,102 @@ class SmartcardCliTests(unittest.TestCase):
             self.assertIn("output path already exists", stderr.getvalue())
             self.assertEqual(output_path.read_text(encoding="utf-8"), "existing\n")
             from_first_reader.assert_not_called()
+
+    def test_cli_pcsc_sign_event_id_writes_verified_signature_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "pcsc-signature.json"
+            command = CommandAPDU.from_bytes(bytes.fromhex(SIGN_EVENT_ID_VECTOR["command_hex"]))
+            simulator_response = SmartcardSimulator(KEY["secret_key"]).exchange(command)
+            transport = PcscTransport.from_first_reader(lambda: [
+                FakePcscReader(FakePcscConnection((list(simulator_response.data), 0x90, 0x00)))
+            ])
+
+            with patch("nsealr_smartcard.cli.PcscTransport.from_first_reader", return_value=transport):
+                result = smartcard_cli.main([
+                    "pcsc-sign-event-id",
+                    "--event-id",
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--review-acknowledged",
+                    "--approval-digest",
+                    APPROVAL_DIGEST,
+                    "--expected-public-key",
+                    GET_PUBLIC_KEY_VECTOR["response_data_hex"],
+                    "--out",
+                    str(output_path),
+                ])
+
+            self.assertEqual(result, 0)
+            output = json.loads(output_path.read_text(encoding="utf-8"))
+            self.assertEqual(output["transport"], "pcsc")
+            self.assertEqual(output["event_id"], SIGN_EVENT_ID_VECTOR["event_id"])
+            self.assertEqual(output["expected_public_key"], GET_PUBLIC_KEY_VECTOR["response_data_hex"])
+            self.assertEqual(output["approval_digest"], APPROVAL_DIGEST)
+            self.assertEqual(output["trusted_review"], "external")
+            self.assertTrue(output["review_acknowledged"])
+            self.assertTrue(output["signature_verified"])
+            self.assertTrue(
+                verify_schnorr_signature(
+                    GET_PUBLIC_KEY_VECTOR["response_data_hex"],
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    output["signature"],
+                )
+            )
+
+    def test_cli_pcsc_sign_event_id_requires_expected_public_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "pcsc-signature.json"
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "nsealr_smartcard",
+                    "pcsc-sign-event-id",
+                    "--event-id",
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--review-acknowledged",
+                    "--approval-digest",
+                    APPROVAL_DIGEST,
+                    "--out",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("--expected-public-key", result.stderr)
+            self.assertFalse(output_path.exists())
+
+    def test_cli_pcsc_sign_event_id_rejects_unverifiable_signature_without_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_root:
+            output_path = Path(temp_root) / "pcsc-signature.json"
+            transport = PcscTransport.from_first_reader(lambda: [
+                FakePcscReader(FakePcscConnection((list(bytes(64)), 0x90, 0x00)))
+            ])
+
+            with patch("nsealr_smartcard.cli.PcscTransport.from_first_reader", return_value=transport), patch(
+                "sys.stderr",
+                new_callable=io.StringIO,
+            ) as stderr:
+                result = smartcard_cli.main([
+                    "pcsc-sign-event-id",
+                    "--event-id",
+                    SIGN_EVENT_ID_VECTOR["event_id"],
+                    "--review-acknowledged",
+                    "--approval-digest",
+                    APPROVAL_DIGEST,
+                    "--expected-public-key",
+                    GET_PUBLIC_KEY_VECTOR["response_data_hex"],
+                    "--out",
+                    str(output_path),
+                ])
+
+            self.assertEqual(result, 1)
+            self.assertIn("SIGN_EVENT_ID signature verification failed", stderr.getvalue())
+            self.assertFalse(output_path.exists())
 
     def test_cli_pcsc_exchange_apdu_writes_raw_apdu_report(self) -> None:
         with tempfile.TemporaryDirectory() as temp_root:

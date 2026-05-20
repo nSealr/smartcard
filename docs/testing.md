@@ -38,6 +38,10 @@ flag; newer pip versions already build in place and leave the flag disabled.
   without overwriting their contents and before simulator exchange or PC/SC
   reader lookup. Missing parent directories are rejected before simulator
   exchange, and successful report writes use exclusive-create semantics.
+- CLI `SIGN_EVENT_ID` report tests proving simulator and PC/SC success
+  responses verify the returned Schnorr signature against the expected x-only
+  public key before output is written. PC/SC signing requires
+  `--expected-public-key`, and unverifiable success responses write no output.
 - CLI PC/SC probe test proving the command fails clearly and writes no output
   when `pyscard` or a reader is unavailable.
 - CLI PC/SC raw APDU report test with a fake reader, proving the command writes

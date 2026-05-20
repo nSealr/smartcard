@@ -77,6 +77,12 @@ require `--review-acknowledged` and `--approval-digest`. The APDU remains a
 allows a human-facing signature artifact without an explicit external review
 acknowledgement.
 
+Status note, 2026-05-20: successful `SIGN_EVENT_ID` reports now verify the
+returned 64-byte Schnorr signature against the expected x-only public key before
+writing output. Simulator reports derive the expected key from the test secret;
+PC/SC signing probes require `--expected-public-key`. This improves host-side
+response verification but still does not claim real-card compatibility.
+
 Status note, 2026-05-19: `nSealr/specs` now publishes the
 `smartcard-slot-0` account descriptor and
 `policy-manual-only-displayless-smartcard` policy profile. This only freezes

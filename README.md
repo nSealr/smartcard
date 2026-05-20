@@ -42,7 +42,11 @@ repository host a forked or custom JavaCard applet.
   existing capture or signing artifact is never overwritten.
   `SIGN_EVENT_ID` report commands require explicit
   `--review-acknowledged` and `--approval-digest` flags because the smartcard
-  cannot review full event JSON on its own display.
+  cannot review full event JSON on its own display. Successful
+  `SIGN_EVENT_ID` reports also verify the returned Schnorr signature against
+  the expected x-only public key before writing output; simulator reports
+  derive that key from the test secret, while PC/SC reports require an explicit
+  `--expected-public-key`.
 - Identity/policy integration is deliberately narrow: the shared
   `nsealr-account-descriptor-v0` fixture `smartcard-slot-0` now pins a
   display-less, manual-only route bound to

@@ -8,7 +8,7 @@ from pathlib import Path
 from .apdu import CommandAPDU, ResponseAPDU
 from .pcsc import PcscTransport, PcscUnavailableError
 from .protocol import INS_GET_PUBLIC_KEY, INS_SIGN_EVENT_ID, NSEALR_CLA, SW_NO_ERROR
-from .simulator import SmartcardSimulator
+from .simulator import SmartcardSimulator, verify_schnorr_signature, xonly_pubkey_from_secret
 
 
 def _hex32(value: str, label: str) -> str:
@@ -27,6 +27,10 @@ def _event_id(value: str) -> str:
 
 def _approval_digest(value: str) -> str:
     return _hex32(value, "approval digest")
+
+
+def _public_key(value: str) -> str:
+    return _hex32(value, "public key")
 
 
 def _command_hex(value: str) -> str:
@@ -104,6 +108,7 @@ def _signature_report(
     response: ResponseAPDU,
     event_id: str,
     approval_digest: str,
+    expected_public_key: str,
 ) -> dict[str, object]:
     report: dict[str, object] = {
         "transport": transport,
@@ -111,12 +116,19 @@ def _signature_report(
         "response_hex": response.to_bytes().hex(),
         "status_word": _status_word(response),
         "event_id": event_id,
+        "expected_public_key": expected_public_key,
         "trusted_review": "external",
         "review_acknowledged": True,
         "approval_digest": approval_digest,
     }
     if response.status_word == SW_NO_ERROR:
-        report["signature"] = response.data.hex()
+        if len(response.data) != 64:
+            raise ValueError("SIGN_EVENT_ID success response must contain a 64-byte Schnorr signature")
+        signature = response.data.hex()
+        if not verify_schnorr_signature(expected_public_key, event_id, signature):
+            raise ValueError("SIGN_EVENT_ID signature verification failed")
+        report["signature"] = signature
+        report["signature_verified"] = True
     return report
 
 
@@ -131,7 +143,11 @@ def _sim_sign_event_id(args: argparse.Namespace) -> None:
     _prepare_output_path(args.out)
     command = _sign_event_id_command(args.event_id)
     response = SmartcardSimulator(args.secret_key).exchange(command)
-    _write_json(args.out, _signature_report("simulator", command, response, args.event_id, args.approval_digest))
+    expected_public_key = xonly_pubkey_from_secret(args.secret_key).hex()
+    _write_json(
+        args.out,
+        _signature_report("simulator", command, response, args.event_id, args.approval_digest, expected_public_key),
+    )
 
 
 def _sim_exchange_apdu(args: argparse.Namespace) -> None:
@@ -152,7 +168,10 @@ def _pcsc_sign_event_id(args: argparse.Namespace) -> None:
     _prepare_output_path(args.out)
     command = _sign_event_id_command(args.event_id)
     response = PcscTransport.from_first_reader().exchange(command)
-    _write_json(args.out, _signature_report("pcsc", command, response, args.event_id, args.approval_digest))
+    _write_json(
+        args.out,
+        _signature_report("pcsc", command, response, args.event_id, args.approval_digest, args.expected_public_key),
+    )
 
 
 def _pcsc_exchange_apdu(args: argparse.Namespace) -> None:
@@ -212,6 +231,12 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         type=_approval_digest,
         help="32-byte lowercase hex digest that binds the external review acknowledgement",
+    )
+    pcsc_sign.add_argument(
+        "--expected-public-key",
+        required=True,
+        type=_public_key,
+        help="32-byte lowercase hex x-only public key expected to verify the card signature",
     )
     pcsc_sign.add_argument("--out", required=True, type=Path)
     pcsc_sign.set_defaults(func=_pcsc_sign_event_id)

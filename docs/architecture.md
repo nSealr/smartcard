@@ -40,9 +40,14 @@ technical references. License boundaries must be respected before any code reuse
   exchange first. `SIGN_EVENT_ID` report commands are gated by explicit
   external review acknowledgement and a 32-byte `approval_digest` so
   display-less signing reports cannot be produced as if the card had reviewed
-  the full event. Raw APDU exchange commands are narrow fixture and capture
-  probes; they report command bytes, response bytes, and status words without
-  adding any event-review or real-card trust claim.
+  the full event. A successful `SIGN_EVENT_ID` response must contain a
+  64-byte Schnorr signature that verifies against the expected x-only public
+  key before any report is written. The simulator derives that expected key
+  from its test secret; PC/SC probe signing requires an explicit
+  `--expected-public-key` because the host route, not the display-less card,
+  owns account selection. Raw APDU exchange commands are narrow fixture and
+  capture probes; they report command bytes, response bytes, and status words
+  without adding any event-review or real-card trust claim.
 
 The first command boundary is deliberately small:
 
@@ -77,7 +82,9 @@ The eventual route can protect a key inside a display-less card, but it must
 not claim trusted event review. It must require external review
 acknowledgement, bind the event id to an `approval_digest` produced by the
 companion or another trusted review device, and clearly report whether a policy
-path, manual path, or refusal path produced the APDU request.
+path, manual path, or refusal path produced the APDU request. Host tools must
+verify successful card signatures against the selected slot public key before
+returning them as accepted signer output.
 
 Smartcard accounts are slot-backed public keys. If a card exposes multiple
 slots, policy attaches to the selected slot public key and route, not to the
