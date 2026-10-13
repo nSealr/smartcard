@@ -1,3 +1,5 @@
+> **Retired from active development (2026-10-13).** Smartcard research is preserved as a public archive. The active project is [nSealr](https://github.com/nSealr/nsealr); it retains connected ESP32, offline Pi/P4 and custom-board paths. This repository does not contain a qualified real-card product or applet. Historical plans below are not an active roadmap.
+
 # nSealr Smartcard
 
 JavaCard/NFC/contact smartcard signer work for nSealr.
